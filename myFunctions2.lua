@@ -490,12 +490,12 @@ function M.switchToLoadout(loadoutNum)
         if loadoutNum == "custom_1" or loadoutNum == "custom_2" or loadoutNum == "custom_3" or loadoutNum == "custom_4" then
             M.loadCustomTeam(loadoutNum)
         else
-            if loadoutNum == 2 then
+            if tonumber(loadoutNum) == 2 then
                 finalNum = 3
-            elseif loadoutNum == 3 then
+            elseif tonumber(loadoutNum) == 3 then
                 finalNum = 2
             else
-                finalNum = loadoutNum
+                finalNum = tonumber(loadoutNum)
             end
 
             local args = {
