@@ -386,22 +386,124 @@ function M.disableEggCollision(disable)
     end)
 end
 
+function M.loadCustomTeam(customName, getFarmSpawnCFrame, beastHubNotify)
+    local function getPetEquipLocation()
+        local ok, result = pcall(function()
+            local spawnCFrame = getFarmSpawnCFrame()
+            if typeof(spawnCFrame) ~= "CFrame" then
+                return nil
+            end
+            return spawnCFrame * CFrame.new(0, 0, -5)
+        end)
+        if ok then
+            return result
+        else
+            warn("EquipLocationError " .. tostring(result))
+            return nil
+        end
+    end
+
+    local function parseFromFile()
+        local ids = {}
+        local ok, content = pcall(function()
+            return readfile("BeastHub/"..customName..".txt")
+        end)
+        if not ok then
+            warn("Failed to read "..customName..".txt")
+            return ids
+        end
+        for line in string.gmatch(content, "([^\n]+)") do
+            local id = string.match(line, "({[%w%-]+})") -- keep the {} with the ID
+            if id then
+                print("id loaded")
+                print(id or "")
+                table.insert(ids, id)
+            end
+        end
+        return ids
+    end
+
+    local function getPlayerData()
+        local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+        local logs = dataService:GetData()
+        return logs
+    end
+
+    local function equippedPets()
+        local playerData = getPlayerData()
+        if not playerData.PetsData then
+            warn("PetsData missing")
+            return nil
+        end
+
+        local tempStorage = playerData.PetsData.EquippedPets
+        if not tempStorage or type(tempStorage) ~= "table" then
+            warn("EquippedPets missing or invalid")
+            return nil
+        end
+
+        local petIdsList = {}
+        for _, id in ipairs(tempStorage) do
+            table.insert(petIdsList, id)
+        end
+
+        return petIdsList
+    end
+    local equipped = equippedPets()
+    if #equipped > 0 then
+        for _,id in ipairs(equipped) do
+            local args = {
+                [1] = "UnequipPet";
+                [2] = id;
+            }
+            game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args))
+            task.wait()
+        end
+    end
+
+    local location = getPetEquipLocation()
+    local petIds = parseFromFile()
+
+    if #petIds == 0 then
+        beastHubNotify(customName.." is empty", "", 3)
+        return
+    end
+
+    for _, id in ipairs(petIds) do
+        local args = {
+            [1] = "EquipPet";
+            [2] = id;
+            [3] = location;
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args))
+        task.wait()
+    end
+
+    beastHubNotify("Loaded "..customName, "", 3)
+
+end
+
 function M.switchToLoadout(loadoutNum)
     local finalNum
     local success, err = pcall(function()
-        if loadoutNum == 2 then
-            finalNum = 3
-        elseif loadoutNum == 3 then
-            finalNum = 2
+        --load file switching
+        if loadoutNum == "custom_1" or loadoutNum == "custom_2" or loadoutNum == "custom_3" or loadoutNum == "custom_4" then
+            M.loadCustomTeam(loadoutNum)
         else
-            finalNum = loadoutNum
-        end
+            if loadoutNum == 2 then
+                finalNum = 3
+            elseif loadoutNum == 3 then
+                finalNum = 2
+            else
+                finalNum = loadoutNum
+            end
 
-        local args = {
-            [1] = "SwapPetLoadout",
-            [2] = finalNum
-        }
-        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer(unpack(args))
+            local args = {
+                [1] = "SwapPetLoadout",
+                [2] = finalNum
+            }
+            game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer(unpack(args))
+        end
     end)
 
     if success then
