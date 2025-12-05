@@ -509,12 +509,11 @@ function M.switchToLoadout(loadoutNum, getFarmSpawnCFrame, beastHubNotify)
     if success then
         --print("Switched to loadout: "..finalNum)
     else
-        print("Error in swithing to ladout: "..finalNum.." | "..err)
+        print("Error in swithing to ladout")
     end
 end
 
 
---EGG Esp (SHX egg ESP support)
 --Get Pet Odds for highlighting
 M.petOdds = {}
 function M.getPetOdds()
