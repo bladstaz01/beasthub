@@ -483,7 +483,7 @@ function M.loadCustomTeam(customName, getFarmSpawnCFrame, beastHubNotify)
 
 end
 
-function M.switchToLoadout(loadoutNum)
+function M.switchToLoadout(loadoutNum, getFarmSpawnCFrame, beastHubNotify)
     local finalNum
     local success, err = pcall(function()
         --load file switching
