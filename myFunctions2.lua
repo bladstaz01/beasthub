@@ -415,8 +415,8 @@ function M.loadCustomTeam(customName, getFarmSpawnCFrame, beastHubNotify)
         for line in string.gmatch(content, "([^\n]+)") do
             local id = string.match(line, "({[%w%-]+})") -- keep the {} with the ID
             if id then
-                print("id loaded")
-                print(id or "")
+                -- print("id loaded")
+                -- print(id or "")
                 table.insert(ids, id)
             end
         end
@@ -479,7 +479,7 @@ function M.loadCustomTeam(customName, getFarmSpawnCFrame, beastHubNotify)
         task.wait()
     end
 
-    beastHubNotify("Loaded "..customName, "", 3)
+    -- beastHubNotify("Loaded "..customName, "", 3)
 
 end
 
