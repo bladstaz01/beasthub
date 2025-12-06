@@ -1,4 +1,4 @@
-local M {}
+local M = {}
     function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames)
         --AUTOMATION
     -- Automation:CreateSection("To be added soon..")
