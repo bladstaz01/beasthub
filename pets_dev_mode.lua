@@ -1,10 +1,11 @@
 local M = {}
 
-M.autoEleWebhook = false
-M.autoNMwebhook = false
+
 
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames)
     local Pets = Window:CreateTab("Pets", "cat")
+    M.autoEleWebhook = false
+    M.autoNMwebhook = false
 
     --Mutation machine
     --get pet mutations list
