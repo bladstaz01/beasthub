@@ -1,10 +1,5 @@
 local M = {}
 
-M.customLoadout1
-M.customLoadout2
-M.customLoadout3
-M.customLoadout4
-
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames)
     local Automation = Window:CreateTab("Automation", "bot")
     Automation:CreateSection("Auto Pet Boost")
