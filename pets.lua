@@ -268,7 +268,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             
             if autoPetMutationEnabled then --declare function code only when condition is right
                 --turn off auto smart hatching instantly
-                Toggle_smartAutoHatch:Set(false)
+                -- Toggle_smartAutoHatch:Set(false)
                 -- Check for missing setup
                 -- Wait until Rayfield sets up the values (or timeout after 10s)
                 local timeout = 3
@@ -830,7 +830,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 return
             else
                 --turn off auto hatching of auto level is on
-                Toggle_smartAutoHatch:Set(false)
+                -- Toggle_smartAutoHatch:Set(false)
                 toggle_autoEle:Set(false)
                 toggle_autoNM:Set(false)
             end
