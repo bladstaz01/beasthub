@@ -488,7 +488,7 @@ function M.switchToLoadout(loadoutNum, getFarmSpawnCFrame, beastHubNotify)
     local success, err = pcall(function()
         --load file switching
         if loadoutNum == "custom_1" or loadoutNum == "custom_2" or loadoutNum == "custom_3" or loadoutNum == "custom_4" then
-            M.loadCustomTeam(loadoutNum)
+            M.loadCustomTeam(loadoutNum, getFarmSpawnCFrame, beastHubNotify)
         else
             if tonumber(loadoutNum) == 2 then
                 finalNum = 3
@@ -509,7 +509,7 @@ function M.switchToLoadout(loadoutNum, getFarmSpawnCFrame, beastHubNotify)
     if success then
         --print("Switched to loadout: "..finalNum)
     else
-        print("Error in swithing to ladout")
+        print("Error in switching to loadout")
     end
 end
 
