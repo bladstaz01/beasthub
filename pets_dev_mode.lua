@@ -1416,7 +1416,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     task.wait(1) 
 
                                     --get updated mutation for webhook if enabled
-                                    if autoNMenabled and autoNMwebhook and curLevel < targetLevel  then
+                                    if autoNMenabled and M.autoNMwebhook and curLevel < targetLevel  then
                                         --get updated enuma
                                         beastHubNotify("Sending webhook","",3)
                                         -- print("Sending webhook..")
@@ -1951,7 +1951,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                 task.wait(.2) 
 
                                 --webhook if enabled
-                                if autoEleEnabled and autoEleWebhook and curLevel < targetLevel  then
+                                if autoEleEnabled and M.autoEleWebhook and curLevel < targetLevel  then
                                     -- local updatedKG = tostring(curBaseKG + 0.1) --static adding of KG instead of get base KG
                                     curBaseKG = getCurrentPetKGByUid(uid)
                                     local updatedKG = string.format("%.2f", curBaseKG * 1.1)
