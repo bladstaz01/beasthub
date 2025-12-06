@@ -1085,7 +1085,7 @@ local M = {}
 
         local autoNMenabled
         local autoNMthread = nil
-        local M.autoNMwebhook = false
+        M.autoNMwebhook = false
         toggle_autoNM = Pets:CreateToggle({
             Name = "Auto Nightmare",
             CurrentValue = false,
@@ -1634,7 +1634,7 @@ local M = {}
 
         local autoEleEnabled
         local autoEleThread = nil
-        local M.autoEleWebhook = false
+        M.autoEleWebhook = false
         toggle_autoEle = Pets:CreateToggle({
             Name = "Auto Elephant",
             CurrentValue = false,
