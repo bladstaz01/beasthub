@@ -1,11 +1,9 @@
 local M = {}
-
-
-
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook)
     local Pets = Window:CreateTab("Pets", "cat")
     M.autoEleWebhook = false
     M.autoNMwebhook = false
+    M.webhookURL
 
     --Mutation machine
     --get pet mutations list
