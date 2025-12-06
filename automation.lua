@@ -1,6 +1,6 @@
 local M = {}
     function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames)
-        -- Automation:CreateSection("To be added soon..")
+        local Automation = Window:CreateTab("Automation", "bot")
         Automation:CreateSection("Auto Pet Boost")
         -- --select pet
         local parag_petsToBoost = Automation:CreateParagraph({
