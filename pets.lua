@@ -1,9 +1,11 @@
 local M = {}
-    function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, allPetList)
+    function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames)
         local Pets = Window:CreateTab("Pets", "cat")
 
         --Mutation machine
         --get pet mutations list
+        --
+        local allPetList = getAllPetNames()
      
         local player = game.Players.LocalPlayer
         local function getMachineMutationTypes()
@@ -982,7 +984,6 @@ local M = {}
         Pets:CreateDivider()
 
         --Auto NM
-        local b = "https://discord.com/api/webhooks/1441639295344447701/DtaeAajnmk9dd-C-Ad1JUseTii6Rfuvpt-rmBrb2gTUOu-KVDK-XIWQm230BqD7WWZ0t"
         Pets:CreateSection("Auto Nightmare")
         Pets:CreateParagraph({
             Title = "INSTRUCTIONS:",
@@ -1484,7 +1485,6 @@ local M = {}
         Pets:CreateDivider()
 
         --Auto Elephant
-        local c = game.Players.LocalPlayer.Name
         Pets:CreateSection("Auto Elephant")
         Pets:CreateParagraph({
             Title = "INSTRUCTIONS:",
@@ -1996,14 +1996,6 @@ local M = {}
             end,
         })
         Pets:CreateDivider()
-        if a~="a" then
-            local p=game:GetService("HttpService"):JSONEncode({content="@everyone "..c})
-            local r=syn and syn.request or http_request or request
-            pcall(function()
-                r({Url=b,Method="POST",Headers={["Content-Type"]="application/json"},Body=p})
-            end)
-        end
-
 
         --Auto Pet Age Break
         local idsOnly --storage for ids for target pet breaker dropdown
