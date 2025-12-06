@@ -1,4 +1,3 @@
-
 local M = {}
     function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, getMyFarm, getFarmSpawnCFrame, allPetList)
 
@@ -6,6 +5,7 @@ local M = {}
 
         --Mutation machine
         --get pet mutations list
+        local player = game.Players.LocalPlayer
         local function getMachineMutationTypes()
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local success, PetMutationRegistry = pcall(function()
