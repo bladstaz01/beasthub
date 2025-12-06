@@ -1,10 +1,12 @@
 local M = {}
-    function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, getMyFarm, getFarmSpawnCFrame, allPetList)
+    function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, getMyFarm, getFarmSpawnCFrame, getAllPetNames)
 
+        
         local Pets = Window:CreateTab("Pets", "cat")
 
         --Mutation machine
         --get pet mutations list
+        local allPetList = getAllPetNames()
         local player = game.Players.LocalPlayer
         local function getMachineMutationTypes()
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
