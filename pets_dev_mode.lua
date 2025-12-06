@@ -1440,7 +1440,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                         --
                                         local playerName = game.Players.LocalPlayer.Name
                                         local webhookMsg = "[BeastHub] "..playerName.." | Auto Nightmare result: "..curPet.."="..updatedMutation
-                                        sendDiscordWebhook(webhookURL, webhookMsg)
+                                        sendDiscordWebhook(M.webhookURL, webhookMsg)
                                         -- beastHubNotify("Webhook sent", "", 2)
                                         task.wait(1)
                                     end
@@ -1958,7 +1958,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     beastHubNotify("Sending webhook","",3)
                                     local playerName = game.Players.LocalPlayer.Name
                                     local webhookMsg = "[BeastHub] "..playerName.." | Auto Elephant result: "..curPet.."="..updatedKG.."KG"
-                                    sendDiscordWebhook(webhookURL, webhookMsg)
+                                    sendDiscordWebhook(M.webhookURL, webhookMsg)
                                     task.wait(1)
                                 end
                             end
