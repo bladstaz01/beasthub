@@ -3,7 +3,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     local Pets = Window:CreateTab("Pets", "cat")
     M.autoEleWebhook = false
     M.autoNMwebhook = false
-    M.webhookURL
+    M.webhookURL = ""
 
     --Mutation machine
     --get pet mutations list
