@@ -1,6 +1,6 @@
 local M = {}
 
-function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames)
+function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook)
     local Automation = Window:CreateTab("Automation", "bot")
     Automation:CreateSection("Auto Pet Boost")
     -- --select pet
