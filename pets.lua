@@ -4,8 +4,21 @@ local M = {}
 
         --Mutation machine
         --get pet mutations list
-        --
-        local allPetList = getAllPetNames()
+        local function safeGetPetNames(fn)
+            local list = fn()
+            local attempts = 0
+
+            while (#list == 0 and attempts < 20) do
+                task.wait(0.25)
+                list = fn()
+                attempts = attempts + 1
+            end
+
+            return list
+        end
+        local allPetList = safeGetPetNames(getAllPetNames)
+
+        task.wait()
      
         local player = game.Players.LocalPlayer
         local function getMachineMutationTypes()
