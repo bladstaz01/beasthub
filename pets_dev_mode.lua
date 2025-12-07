@@ -139,7 +139,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         Flag = "phoenixLoadoutNum", 
         Callback = function(Options)
             --if not Options or not Options[1] then return end
-            phoenixLoady = tonumber(Options[1])
+            phoenixLoady = Options[1]
         end,
     })
     local levelingLoady
@@ -151,7 +151,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         Flag = "levelingLoadoutNum", 
         Callback = function(Options)
             --if not Options or not Options[1] then return end
-            levelingLoady = tonumber(Options[1])
+            levelingLoady = Options[1]
         end,
     })
     local golemLoady
@@ -163,7 +163,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         Flag = "golemLoadoutNum", 
         Callback = function(Options)
             --if not Options or not Options[1] then return end
-            golemLoady = tonumber(Options[1])
+            golemLoady = Options[1]
         end,
     })
 
@@ -865,7 +865,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             -- Wait until Rayfield sets up the values (or timeout after 10s)
             local timeout = 3
             while timeout > 0 and (
-                not levelingLoady or levelingLoady == "None"
+                (not levelingLoady or levelingLoady == "None") and not (levelingLoady and string.find(levelingLoady, "custom", 1, true))
                 or targetPetsForAutoLevel == nil or targetPetsForAutoLevel == "None"
                 or not isNum
             ) do
@@ -1094,7 +1094,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         Flag = "horsemanLoadoutNum", 
         Callback = function(Options)
             --if not Options or not Options[1] then return end
-            horsemanLoady = tonumber(Options[1])
+            horsemanLoady = Options[1]
         end,
     })
 
@@ -1124,7 +1124,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 -- Wait until Rayfield sets up the values (or timeout after 10s)
                 local timeout = 5
                 while timeout > 0 and (
-                    not levelingLoady or levelingLoady == "None"
+                    (not levelingLoady or levelingLoady == "None") and not (levelingLoady and string.find(levelingLoady, "custom", 1, true))
                     or not selectedPetForAutoNM
                     or not tonumber(targetLevelForNM.CurrentValue)
                     or autoEleAfterAutoNMenabled == nil 
@@ -1135,9 +1135,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 --checkers here, final check, works for sudden reconnection
                 local targetLevel = tonumber(targetLevelForNM.CurrentValue)
                 local isNum = targetLevel
-                if not levelingLoady or levelingLoady == "None"
+                if (not levelingLoady or levelingLoady == "None") and not (levelingLoady and string.find(levelingLoady, "custom", 1, true))
                 or not selectedPetForAutoNM 
-                or not horsemanLoady or horsemanLoady == "None"
+                or (not horsemanLoady or horsemanLoady == "None") and not (horsemanLoady and string.find(horsemanLoady, "custom", 1, true))
                 or not isNum then
                     beastHubNotify("Missing setup!", "Please also check leveling loadout", 10)
                     return
@@ -1619,7 +1619,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         Flag = "elephantLoadoutNum", 
         Callback = function(Options)
             --if not Options or not Options[1] then return end
-            elephantLoady = tonumber(Options[1])
+            elephantLoady = Options[1]
         end,
     })
 
@@ -1672,7 +1672,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                 local timeout = 5
                 while timeout > 0 and (
-                    not levelingLoady or levelingLoady == "None"
+                    (not levelingLoady or levelingLoady == "None") and not (levelingLoady and string.find(levelingLoady, "custom", 1, true))
                     -- or toyForStacking.CurrentOption[1] == nil
                     or not selectedPetForAutoEle
                     -- or not tonumber(targetLevelForEle.CurrentValue)
@@ -1693,9 +1693,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 local isNumKG = targetKG
                 -- local isNumDelay = delayInMins
 
-                if not levelingLoady or levelingLoady == "None"
+                if (not levelingLoady or levelingLoady == "None")  and not (levelingLoady and string.find(levelingLoady, "custom", 1, true))
                 or not selectedPetForAutoEle 
-                or not elephantLoady or elephantLoady == "None"
+                or (not elephantLoady or elephantLoady == "None")  and not (elephantLoady and string.find(elephantLoady, "custom", 1, true))
                 -- or not toyToUse or toyToUse == ""
                 or not isNumKG 
                 or not eleUsed or eleUsed == "" then
