@@ -133,7 +133,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     local phoenixLoady
     Pets:CreateDropdown({
         Name = "Phoenix Loadout",
-        Options = {"None", "1", "2", "3", "4", "5", "6"},
+        Options = {"None", "1", "2", "3", "4", "5", "6", "custom_1", "custom_2", "custom_3", "custom_4"},
         CurrentOption = {},
         MultipleOptions = false,
         Flag = "phoenixLoadoutNum", 
@@ -145,7 +145,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     local levelingLoady
     Pets:CreateDropdown({
         Name = "Leveling Loadout (Free 1 pet space)",
-        Options = {"None", "1", "2", "3", "4", "5", "6"},
+        Options = {"None", "1", "2", "3", "4", "5", "6", "custom_1", "custom_2", "custom_3", "custom_4"},
         CurrentOption = {},
         MultipleOptions = false,
         Flag = "levelingLoadoutNum", 
@@ -157,7 +157,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     local golemLoady
     Pets:CreateDropdown({
         Name = "Golem Loadout",
-        Options = {"None", "1", "2", "3", "4", "5", "6"},
+        Options = {"None", "1", "2", "3", "4", "5", "6", "custom_1", "custom_2", "custom_3", "custom_4"},
         CurrentOption = {},
         MultipleOptions = false,
         Flag = "golemLoadoutNum", 
@@ -268,7 +268,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             
             if autoPetMutationEnabled then --declare function code only when condition is right
                 --turn off auto smart hatching instantly
-                Toggle_smartAutoHatch:Set(false)
+                -- Toggle_smartAutoHatch:Set(false)
                 -- Check for missing setup
                 -- Wait until Rayfield sets up the values (or timeout after 10s)
                 local timeout = 3
@@ -830,7 +830,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 return
             else
                 --turn off auto hatching of auto level is on
-                Toggle_smartAutoHatch:Set(false)
+                -- Toggle_smartAutoHatch:Set(false)
                 toggle_autoEle:Set(false)
                 toggle_autoNM:Set(false)
             end
@@ -1066,7 +1066,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     local horsemanLoady
     Pets:CreateDropdown({
         Name = "Horseman Loadout (Free 1 pet space)",
-        Options = {"None", "1", "2", "3", "4", "5", "6"},
+        Options = {"None", "1", "2", "3", "4", "5", "6", "custom_1", "custom_2", "custom_3", "custom_4"},
         CurrentOption = {},
         MultipleOptions = false,
         Flag = "horsemanLoadoutNum", 
@@ -1591,7 +1591,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     local elephantLoady
     Pets:CreateDropdown({
         Name = "Elephant Loadout",
-        Options = {"None", "1", "2", "3", "4", "5", "6"},
+        Options = {"None", "1", "2", "3", "4", "5", "6", "custom_1", "custom_2", "custom_3", "custom_4"},
         CurrentOption = {},
         MultipleOptions = false,
         Flag = "elephantLoadoutNum", 
