@@ -273,24 +273,46 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 -- Wait until Rayfield sets up the values (or timeout after 10s)
                 local timeout = 3
                 while timeout > 0 and (
-                    not phoenixLoady or phoenixLoady == "None"
-                    or not levelingLoady or levelingLoady == "None"
-                    or not golemLoady or golemLoady == "None"
+                    (
+                        (not phoenixLoady or phoenixLoady == "None")
+                        and not (phoenixLoady and string.find(phoenixLoady, "custom", 1, true))
+                    )
+                    or (
+                        (not levelingLoady or levelingLoady == "None")
+                        and not (levelingLoady and string.find(levelingLoady, "custom", 1, true))
+                    )
+                    or (
+                        (not golemLoady or golemLoady == "None")
+                        and not (golemLoady and string.find(golemLoady, "custom", 1, true))
+                    )
                     or not selectedPetsForAutoMutation
                     or not selectedMutationsForAutoMutation or #selectedMutationsForAutoMutation == 0
                 ) do
                     task.wait(1)
                     timeout = timeout - 1
                 end
-                --checkers here, final check, works for sudden reconnection
-                if not phoenixLoady or phoenixLoady == "None"
-                or not levelingLoady or levelingLoady == "None"
-                or not golemLoady or golemLoady == "None" 
-                or not selectedPetsForAutoMutation
-                or not selectedMutationsForAutoMutation or #selectedMutationsForAutoMutation == 0 then
+
+                --final validation
+                if
+                    (
+                        (not phoenixLoady or phoenixLoady == "None")
+                        and not (phoenixLoady and string.find(phoenixLoady, "custom", 1, true))
+                    )
+                    or (
+                        (not levelingLoady or levelingLoady == "None")
+                        and not (levelingLoady and string.find(levelingLoady, "custom", 1, true))
+                    )
+                    or (
+                        (not golemLoady or golemLoady == "None")
+                        and not (golemLoady and string.find(golemLoady, "custom", 1, true))
+                    )
+                    or not selectedPetsForAutoMutation
+                    or not selectedMutationsForAutoMutation or #selectedMutationsForAutoMutation == 0
+                then
                     beastHubNotify("Missing setup!", "Please recheck loadouts", 10)
                     return
                 end
+
                 
                 autoMutatePetsV2 = function(selectedPetForAutoMutation, mutations, onComplete)
                     --local functions
