@@ -998,7 +998,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     Automation:CreateDivider()
 
     Automation:CreateSection("Auto Loadout Switcher (Standalone)")
-    Automation:CreateDropdown({
+    local switcher1 = Automation:CreateDropdown({
         Name = "First loadout",
         Options = {"custom_1","custom_2","custom_3","custom_4"},
         CurrentOption = {},
@@ -1009,7 +1009,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         -- The variable (Options) is a table of strings for the current selected options
         end,
     })
-    Automation:CreateInput({
+    local switcher1_delay = Automation:CreateInput({
         Name = "First loadout duration",
         CurrentValue = "",
         PlaceholderText = "seconds",
@@ -1020,7 +1020,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         -- The variable (Text) is a string for the value in the text box
         end,
     })
-    Automation:CreateDropdown({
+    local switcher2 = Automation:CreateDropdown({
         Name = "Second loadout",
         Options = {"custom_1","custom_2","custom_3","custom_4"},
         CurrentOption = {},
@@ -1031,7 +1031,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         -- The variable (Options) is a table of strings for the current selected options
         end,
     })
-    Automation:CreateInput({
+    local switcher2_delay = Automation:CreateInput({
         Name = "Second loadout duration",
         CurrentValue = "",
         PlaceholderText = "seconds",
@@ -1042,16 +1042,72 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         -- The variable (Text) is a string for the value in the text box
         end,
     })
+
+    local autoSwitchEnabled = false
+    local autoSwitcherThread = nil
     Automation:CreateToggle({
         Name = "Auto Loadout Switcher",
         CurrentValue = false,
-        Flag = "autoLoadoutSwitcher", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+        Flag = "autoLoadoutSwitcher",
         Callback = function(Value)
-            if Value then
-                beastHubNotify("coming soon..", "", 1)
+            autoSwitchEnabled = Value
+
+            -- validate dropdowns
+            local loadout1 = switcher1.CurrentOption[1]
+            local loadout2 = switcher2.CurrentOption[1]
+
+            if autoSwitchEnabled then
+                if not loadout1 or loadout1 == "" then
+                    beastHubNotify("Missing first loadout selection", "", "1")
+                    autoSwitchEnabled = false
+                    return
+                end
+
+                if not loadout2 or loadout2 == "" then
+                    beastHubNotify("Missing second loadout selection", "", "1")
+                    autoSwitchEnabled = false
+                    return
+                end
+
+                -- validate durations
+                local delay1 = tonumber(switcher1_delay.CurrentValue)
+                local delay2 = tonumber(switcher2_delay.CurrentValue)
+
+                if not delay1 or delay1 <= 0 then
+                    beastHubNotify("Invalid first loadout duration", "", "1")
+                    autoSwitchEnabled = false
+                    return
+                end
+
+                if not delay2 or delay2 <= 0 then
+                    beastHubNotify("Invalid second loadout duration", "", "1")
+                    autoSwitchEnabled = false
+                    return
+                end
+
+                if autoSwitcherThread then
+                    return
+                end
+
+                autoSwitcherThread = task.spawn(function()
+                    while autoSwitchEnabled do
+                        myFunctions.switchToLoadout(loadout1, getFarmSpawnCFrame, beastHubNotify)
+                        task.wait(delay1)
+
+                        myFunctions.switchToLoadout(loadout2, getFarmSpawnCFrame, beastHubNotify)
+                        task.wait(delay2)
+                    end
+
+                    autoSwitcherThread = nil
+                end)
+            else
+                autoSwitchEnabled = false
+                autoSwitcherThread = nil
             end
         end,
     })
+
+
     Automation:CreateDivider()
 
 
