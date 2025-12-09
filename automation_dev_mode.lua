@@ -2,6 +2,197 @@ local M = {}
 
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook)
     local Automation = Window:CreateTab("Automation", "bot")
+    
+    --Auto pick & place
+    Automation:CreateSection("Auto Pick & Place")
+    local parag_petsToPickup = Automation:CreateParagraph({
+        Title = "Pet/s to Pickup:",
+        Content = "None"
+    })
+    local dropdown_selectPetsForPickup = Automation:CreateDropdown({
+        Name = "Select Pet/s",
+        Options = {},
+        CurrentOption = {},
+        MultipleOptions = true,
+        Flag = "selectPetsForPickUp", 
+        Callback = function(Options)
+            local listText = table.concat(Options, ", ")
+            if listText == "" then
+                listText = "None"
+            end
+
+            parag_petsToPickup:Set({
+                Title = "Pet/s to Pickup:",
+                Content = listText
+            })
+        end,
+
+    })
+    Automation:CreateButton({
+        Name = "Refresh list",
+        Callback = function()
+            local function getPlayerData()
+                local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                local logs = dataService:GetData()
+                return logs
+            end
+
+            local function equippedPets()
+                local playerData = getPlayerData()
+                if not playerData.PetsData then
+                    warn("PetsData missing")
+                    return nil
+                end
+
+                local tempStorage = playerData.PetsData.EquippedPets
+                if not tempStorage or type(tempStorage) ~= "table" then
+                    warn("EquippedPets missing or invalid")
+                    return nil
+                end
+
+                local petIdsList = {}
+                for _, id in ipairs(tempStorage) do
+                    table.insert(petIdsList, id)
+                end
+
+                return petIdsList
+            end
+
+            local function getPetNameUsingId(uid)
+                local playerData = getPlayerData()
+                if playerData.PetsData.PetInventory.Data then
+                    local data = playerData.PetsData.PetInventory.Data
+                    for id,petData in pairs(data) do
+                        if id == uid then
+                            return petData.PetType.." > "..petData.PetData.Name.." > "..string.format("%.2f", petData.PetData.BaseWeight * 1.1).."kg"
+                        end
+                    end
+                end
+            end
+
+            local equipped = equippedPets()
+            local namesToId = {}
+            for _,id in ipairs(equipped) do
+                local petName = getPetNameUsingId(id)
+                table.insert(namesToId, petName.." | "..id)
+            end
+
+            if equipped and #equipped > 0 then
+                dropdown_selectPetsForPickup:Refresh(namesToId)
+            else
+                beastHubNotify("equipped pets error", "", 3)
+            end
+        end,
+    })
+    Automation:CreateButton({
+        Name = "Clear Selected",
+        Callback = function()
+            dropdown_selectPetsForPickup:Set({})
+            parag_petsToPickup:Set({
+                Title = "Pet/s to Pickup:",
+                Content = "None"
+            })
+        end,
+    })
+
+    --when ready
+    Automation:CreateDivider()
+    Automation:CreateSection("When ready..")
+    local parag_petsToMonitor = Automation:CreateParagraph({
+        Title = "Pet/s to Monitor:",
+        Content = "None"
+    })
+    local dropdown_selectPetsForMonitor = Automation:CreateDropdown({
+        Name = "Select Pet/s",
+        Options = {},
+        CurrentOption = {},
+        MultipleOptions = true,
+        Flag = "selectPetsForPickMonitor", 
+        Callback = function(Options)
+            local listText = table.concat(Options, ", ")
+            if listText == "" then
+                listText = "None"
+            end
+
+            parag_petsToMonitor:Set({
+                Title = "Pet/s to Monitor:",
+                Content = listText
+            })
+        end,
+
+    })
+    Automation:CreateButton({
+        Name = "Refresh list",
+        Callback = function()
+            local function getPlayerData()
+                local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                local logs = dataService:GetData()
+                return logs
+            end
+
+            local function equippedPets()
+                local playerData = getPlayerData()
+                if not playerData.PetsData then
+                    warn("PetsData missing")
+                    return nil
+                end
+
+                local tempStorage = playerData.PetsData.EquippedPets
+                if not tempStorage or type(tempStorage) ~= "table" then
+                    warn("EquippedPets missing or invalid")
+                    return nil
+                end
+
+                local petIdsList = {}
+                for _, id in ipairs(tempStorage) do
+                    table.insert(petIdsList, id)
+                end
+
+                return petIdsList
+            end
+
+            local function getPetNameUsingId(uid)
+                local playerData = getPlayerData()
+                if playerData.PetsData.PetInventory.Data then
+                    local data = playerData.PetsData.PetInventory.Data
+                    for id,petData in pairs(data) do
+                        if id == uid then
+                            return petData.PetType.." > "..petData.PetData.Name.." > "..string.format("%.2f", petData.PetData.BaseWeight * 1.1).."kg"
+                        end
+                    end
+                end
+            end
+
+            local equipped = equippedPets()
+            local namesToId = {}
+            for _,id in ipairs(equipped) do
+                local petName = getPetNameUsingId(id)
+                table.insert(namesToId, petName.." | "..id)
+            end
+
+            if equipped and #equipped > 0 then
+                dropdown_selectPetsForMonitor:Refresh(namesToId)
+            else
+                beastHubNotify("equipped pets error", "", 3)
+            end
+        end,
+    })
+    Automation:CreateButton({
+        Name = "Clear Selected",
+        Callback = function()
+            dropdown_selectPetsForMonitor:Set({})
+            parag_petsToMonitor:Set({
+                Title = "Pet/s to Monitor:",
+                Content = "None"
+            })
+        end,
+    })
+
+
+
+    Automation:CreateDivider()
+    
+    --Auto Pet boos
     Automation:CreateSection("Auto Pet Boost")
     -- --select pet
     local parag_petsToBoost = Automation:CreateParagraph({
@@ -334,31 +525,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     Automation:CreateDivider()
 
 
-    --Auto Pick&place
-    -- local parag_petsPickup = Automation:CreateParagraph({
-    --     Title = "Pet/s to pick&place:",
-    --     Content = "None"
-    -- })
-    -- Automation:CreateSection("Auto Pick&place")
-    -- Automation:CreateDropdown({
-    --     Name = "Select Pet/s",
-    --     Options = {},
-    --     CurrentOption = {"Option 1"},
-    --     MultipleOptions = false,
-    --     Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-    --     Callback = function(Options)
-    --         local listText = table.concat(Options, ", ")
-    --         if listText == "" then
-    --             listText = "None"
-    --         end
-
-    --         parag_petsPickup:Set({
-    --             Title = "Pet/s to pick&place:",
-    --             Content = listText
-    --         })
-    --     end,
-    -- })
-    -- Automation:CreateDivider()
 
     Automation:CreateSection("Custom Loadouts")
 
