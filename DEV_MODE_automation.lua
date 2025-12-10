@@ -189,6 +189,18 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         end,
     })
 
+    local nextPickup_delay = Automation:CreateInput({
+        Name = "Delay for next Pickup",
+        CurrentValue = "",
+        PlaceholderText = "seconds",
+        RemoveTextAfterFocusLost = false,
+        Flag = "nextPickupDelay",
+        Callback = function(Text)
+        -- The function that takes place when the input is changed
+        -- The variable (Text) is a string for the value in the text box
+        end,
+    })
+
     -- Auto PickUp toggle variables
     local autoPickupEnabled = false
     local autoPickupThread = nil
@@ -307,14 +319,16 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 local location = CFrame.new(dropPos)
 
                 local pickupList, monitorList, t = {}, {}, 0
+                local delayForNextPickup
                 while t < 3 do
                     pickupList = dropdown_selectPetsForPickup and dropdown_selectPetsForPickup.CurrentOption or {}
                     monitorList = dropdown_selectPetsForMonitor and dropdown_selectPetsForMonitor.CurrentOption or {}
-                    if #pickupList > 0 and #monitorList > 0 then break end
+                    delayForNextPickup = nextPickup_delay.CurrentValue
+                    if #pickupList > 0 and #monitorList > 0 and delayForNextPickup then break end
                     task.wait(0.5)
                     t += 0.5
                 end
-                if #pickupList == 0 or #monitorList == 0 then
+                if #pickupList == 0 or #monitorList == 0 or not delayForNextPickup then
                     beastHubNotify("Missing Setup, please select pets to pick and place", "", 3)
                     return
                 end
@@ -362,7 +376,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     }
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
                                     beastHubNotify("Pet placed","", 2)
-                                    task.wait()
+                                    task.wait(delayForNextPickup)
                                 end
                             else
                                 sessionFirstCast = true
