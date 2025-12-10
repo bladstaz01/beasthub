@@ -320,9 +320,10 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                             local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                             local animIndex = GetAnimationIndexFromUUID(curMonitorPetId)
+                            local sessionFirstCast = true
 
                             --if ready
-                            if animIndex == 1 then
+                            if animIndex == 1 and sessionFirstCast then
                                 --pickup loop here
                                 for _, pickupEntry in ipairs(pickupList) do
                                     if not autoPickupEnabled then
@@ -337,7 +338,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args))
                                     task.wait()
                                     --equip to hand
-                                    -- equipPetByUuid(curPickupPetId)
+                                    equipPetByUuid(curPickupPetId)
                                     --equip to farm
                                     local args2 = {
                                         [1] = "EquipPet";
@@ -347,6 +348,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
 
                                 end
+                                sessionFirstCast = false
+                            else
+                                sessionFirstCast = true
                             end
                             
 
