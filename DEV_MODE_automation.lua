@@ -386,6 +386,12 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
                                     beastHubNotify("Pet placed","", 2)
                                     justCasted = true
+                                    if not autoPickupEnabled or justCasted then
+                                        beastHubNotify("Waiting for next cast delay","", delayForNextPickup)
+                                        task.wait(delayForNextPickup)
+                                        justCasted = false
+                                        break
+                                    end
                                 end
                             end
                             task.wait(0.001)
