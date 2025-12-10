@@ -358,7 +358,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     end
                                     local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                                     --UnequipPet
-                                    beastHubNotify("Picking up pet", "", 2)
+                                    -- beastHubNotify("Picking up pet", "", 2)
                                     local args = {
                                         [1] = "UnequipPet";
                                         [2] = curPickupPetId;
@@ -370,7 +370,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     equipPetByUuid(curPickupPetId)
                                     task.wait()
                                     --equip to farm
-                                    beastHubNotify("Placing pet", "", 2)
+                                    -- beastHubNotify("Placing pet", "", 2)
                                     local args2 = {
                                         [1] = "EquipPet";
                                         [2] = curPickupPetId;
@@ -378,7 +378,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     }
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
                                     task.wait()
-                                    beastHubNotify("Pet placed","", 2)
+                                    -- beastHubNotify("Pet placed","", 2)
                                     justCasted = true
                                 end
                             end
