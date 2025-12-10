@@ -326,7 +326,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     delayForNextPickup = tonumber(nextPickup_delay.CurrentValue)
                     if #pickupList > 0 and #monitorList > 0 then
                         if not delayForNextPickup then
-                            beastHubNotify("Delay for next pickup must be a number!", "", 3)
+                            beastHubNotify("Invalid delay", "", 3)
                             return
                         end
                         break
@@ -341,13 +341,15 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 end
 
 
-
+                
                 autoPickupThread = task.spawn(function()
-                    local sessionFirstCast = true
-                    
+                    local justCasted = false   
                     while autoPickupEnabled and M.isSafeToPickPlace do
                         for _, monitorEntry in ipairs(monitorList) do
-                            if not autoPickupEnabled then
+                            if not autoPickupEnabled or justCasted then
+                                beastHubNotify("Waiting for next cast delay","", delayForNextPickup)
+                                task.wait(delayForNextPickup)
+                                justCasted = false
                                 break
                             end
 
@@ -355,10 +357,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             local animIndex = GetAnimationIndexFromUUID(curMonitorPetId)
                         
                             --if ready
-                            if animIndex == 1 and sessionFirstCast then
-                                sessionFirstCast = false
+                            if animIndex == 1 and not justCasted then
                                 --pickup loop here
-                                print("pet ready detected!")
+                                -- print("pet ready detected!")
                                 for _, pickupEntry in ipairs(pickupList) do
                                     if not autoPickupEnabled then
                                         break
@@ -384,17 +385,12 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     }
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
                                     beastHubNotify("Pet placed","", 2)
-                                    task.wait(delayForNextPickup)
+                                    justCasted = true
                                 end
-                            else
-                                sessionFirstCast = true
                             end
-                            
-
                             task.wait(0.001)
                         end
-
-                        task.wait(0.001)
+                        beastHubNotify("End of monitoring loop","", 2)
                     end
 
                     autoPickupThread = nil
