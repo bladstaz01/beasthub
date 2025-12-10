@@ -306,18 +306,16 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 local dropPos = spawnCFrame:PointToWorldSpace(offset)
                 local location = CFrame.new(dropPos)
 
+                local pickupList = dropdown_selectPetsForPickup and dropdown_selectPetsForPickup.CurrentOption or {}
+                local monitorList = dropdown_selectPetsForMonitor and dropdown_selectPetsForMonitor.CurrentOption or {}
+
+                if #pickupList == 0 or #monitorList == 0 then
+                    beastHubNotify("Missing Setup, please select pets to pick and place", "", 3)
+                    return
+                end
+
                 autoPickupThread = task.spawn(function()
-
                     while autoPickupEnabled and M.isSafeToPickPlace do
-
-                        local pickupList = dropdown_selectPetsForPickup and dropdown_selectPetsForPickup.CurrentOption or {}
-                        local monitorList = dropdown_selectPetsForMonitor and dropdown_selectPetsForMonitor.CurrentOption or {}
-
-                        if #pickupList == 0 or #monitorList == 0 then
-                            beastHubNotify("Missing Setup, please select pets to pick and place", "", 3)
-                            return
-                        end
-
                         for _, monitorEntry in ipairs(monitorList) do
                             if not autoPickupEnabled then
                                 break
@@ -328,7 +326,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             local sessionFirstCast = true
 
                             --if ready
-                            if animIndex == 1 and sessionFirstCast then
+                            if animIndex == 1 then
                                 --pickup loop here
                                 for _, pickupEntry in ipairs(pickupList) do
                                     if not autoPickupEnabled then
@@ -351,18 +349,18 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                         [3] = location;
                                     }
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
-
+                                    task.wait()
                                 end
-                                sessionFirstCast = false
-                            else
-                                sessionFirstCast = true
+                                -- sessionFirstCast = false
+                            -- else
+                            --     sessionFirstCast = true
                             end
                             
 
                             task.wait()
                         end
 
-                        task.wait(0.001)
+                        task.wait(5)
                     end
 
                     autoPickupThread = nil
