@@ -343,7 +343,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     end
                                     local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                                     --UnequipPet
-                                    beastHubNotify("Unequipping pet", "", 1)
+                                    beastHubNotify("Picking up pet", "", 2)
                                     local args = {
                                         [1] = "UnequipPet";
                                         [2] = curPickupPetId;
@@ -351,29 +351,28 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args))
                                     task.wait()
                                     --equip to hand
-                                    beastHubNotify("Equipping pet", "", 1)
+                                    -- beastHubNotify("Equipping pet", "", 1)
                                     equipPetByUuid(curPickupPetId)
                                     --equip to farm
-                                    beastHubNotify("Dropping pet to garden", "", 1)
+                                    beastHubNotify("Placing pet", "", 2)
                                     local args2 = {
                                         [1] = "EquipPet";
                                         [2] = curPickupPetId;
                                         [3] = location;
                                     }
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
-                                    beastHubNotify("Waiting for dropped pet to cast","", 5)
-                                    task.wait(2)
+                                    beastHubNotify("Pet placed","", 2)
+                                    task.wait()
                                 end
-                                sessionFirstCast = false
                             else
                                 sessionFirstCast = true
                             end
                             
 
-                            task.wait()
+                            task.wait(0.001)
                         end
 
-                        task.wait()
+                        task.wait(0.001)
                     end
 
                     autoPickupThread = nil
