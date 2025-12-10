@@ -324,14 +324,22 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     pickupList = dropdown_selectPetsForPickup and dropdown_selectPetsForPickup.CurrentOption or {}
                     monitorList = dropdown_selectPetsForMonitor and dropdown_selectPetsForMonitor.CurrentOption or {}
                     delayForNextPickup = tonumber(nextPickup_delay.CurrentValue)
-                    if #pickupList > 0 and #monitorList > 0 and delayForNextPickup then break end
+                    if #pickupList > 0 and #monitorList > 0 then
+                        if not delayForNextPickup then
+                            beastHubNotify("Delay for next pickup must be a number!", "", 3)
+                            return
+                        end
+                        break
+                    end
                     task.wait(0.5)
                     t += 0.5
                 end
-                if #pickupList == 0 or #monitorList == 0 or not delayForNextPickup then
+
+                if #pickupList == 0 or #monitorList == 0 then
                     beastHubNotify("Missing Setup, please select pets to pick and place", "", 3)
                     return
                 end
+
 
 
                 autoPickupThread = task.spawn(function()
