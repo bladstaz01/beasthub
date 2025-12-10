@@ -300,7 +300,12 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     end
                 end
 
-                local location = getPetEquipLocation()
+                -- local location = getPetEquipLocation()
+                local spawnCFrame = getFarmSpawnCFrame()
+                local offset = Vector3.new(8,0,-50)
+                local dropPos = spawnCFrame:PointToWorldSpace(offset)
+                local location = CFrame.new(dropPos)
+
                 autoPickupThread = task.spawn(function()
 
                     while autoPickupEnabled and M.isSafeToPickPlace do
@@ -357,7 +362,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             task.wait()
                         end
 
-                        task.wait(.1)
+                        task.wait(0.001)
                     end
 
                     autoPickupThread = nil
