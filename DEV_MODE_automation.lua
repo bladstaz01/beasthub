@@ -323,7 +323,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 while t < 3 do
                     pickupList = dropdown_selectPetsForPickup and dropdown_selectPetsForPickup.CurrentOption or {}
                     monitorList = dropdown_selectPetsForMonitor and dropdown_selectPetsForMonitor.CurrentOption or {}
-                    delayForNextPickup = nextPickup_delay.CurrentValue
+                    delayForNextPickup = tonumber(nextPickup_delay.CurrentValue)
                     if #pickupList > 0 and #monitorList > 0 and delayForNextPickup then break end
                     task.wait(0.5)
                     t += 0.5
