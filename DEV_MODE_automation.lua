@@ -382,7 +382,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     justCasted = true
                                 end
                             end
-                            task.wait(0.001)
+                            task.wait()
                         end
                     end
 
