@@ -328,6 +328,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             --if ready
                             if animIndex == 1 then
                                 --pickup loop here
+                                print("pet ready detected!")
                                 for _, pickupEntry in ipairs(pickupList) do
                                     if not autoPickupEnabled then
                                         break
@@ -357,10 +358,10 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             end
                             
 
-                            task.wait()
+                            task.wait(5)
                         end
 
-                        task.wait(5)
+                        task.wait(.01)
                     end
 
                     autoPickupThread = nil
