@@ -324,8 +324,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     local sessionFirstCast = true
                     
                     while autoPickupEnabled and M.isSafeToPickPlace do
-                        print("sessionFirstCast")
-                        print(sessionFirstCast)
                         for _, monitorEntry in ipairs(monitorList) do
                             if not autoPickupEnabled then
                                 break
@@ -364,7 +362,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     }
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
                                     beastHubNotify("Waiting for dropped pet to cast","", 5)
-                                    task.wait(5)
+                                    task.wait(2)
                                 end
                                 sessionFirstCast = false
                             else
