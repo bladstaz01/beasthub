@@ -390,7 +390,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             end
                             task.wait(0.001)
                         end
-                        beastHubNotify("End of monitoring loop","", 2)
                     end
 
                     autoPickupThread = nil
