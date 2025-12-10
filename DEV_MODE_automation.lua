@@ -249,19 +249,19 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     end
 
                     if not foundState then
-                        print("UUID not found:", targetUUID)
+                        -- print("UUID not found:", targetUUID)
                         return
                     end
 
                     if not foundState.CurrentAnimation then
-                        print("No CurrentAnimation found")
+                        -- print("No CurrentAnimation found")
                         return
                     end
 
                     local currentAnim = foundState.CurrentAnimation
                     local loaded = foundState.LoadedAnimations
                     if not loaded or type(loaded) ~= "table" then
-                        print("No LoadedAnimations table")
+                        -- print("No LoadedAnimations table")
                         return
                     end
 
@@ -275,14 +275,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             break
                         end
                     end
-
-                    if position then
-                        -- print("Current animation index:", position)
-                        -- beastHubNotify("Current animation index: "..tostring(position) or "", "", 3)
-                    else
-                        -- print("Current animation not found in LoadedAnimations")
-                    end
-
                     return position
                 end
 
@@ -347,7 +339,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     while autoPickupEnabled and M.isSafeToPickPlace do
                         for _, monitorEntry in ipairs(monitorList) do
                             if not autoPickupEnabled or justCasted then
-                                beastHubNotify("Waiting for next cast delay","", delayForNextPickup)
+                                beastHubNotify("Waiting for next cast delay","delay: "..tostring(delayForNextPickup), delayForNextPickup)
                                 task.wait(delayForNextPickup)
                                 justCasted = false
                                 break
@@ -376,6 +368,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     --equip to hand
                                     -- beastHubNotify("Equipping pet", "", 1)
                                     equipPetByUuid(curPickupPetId)
+                                    task.wait()
                                     --equip to farm
                                     beastHubNotify("Placing pet", "", 2)
                                     local args2 = {
@@ -384,14 +377,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                         [3] = location;
                                     }
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
+                                    task.wait()
                                     beastHubNotify("Pet placed","", 2)
                                     justCasted = true
-                                    if not autoPickupEnabled or justCasted then
-                                        beastHubNotify("Waiting for next cast delay","", delayForNextPickup)
-                                        task.wait(delayForNextPickup)
-                                        justCasted = false
-                                        break
-                                    end
                                 end
                             end
                             task.wait(0.001)
