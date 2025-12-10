@@ -306,13 +306,19 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 local dropPos = spawnCFrame:PointToWorldSpace(offset)
                 local location = CFrame.new(dropPos)
 
-                local pickupList = dropdown_selectPetsForPickup and dropdown_selectPetsForPickup.CurrentOption or {}
-                local monitorList = dropdown_selectPetsForMonitor and dropdown_selectPetsForMonitor.CurrentOption or {}
-
+                local pickupList, monitorList, t = {}, {}, 0
+                while t < 3 do
+                    pickupList = dropdown_selectPetsForPickup and dropdown_selectPetsForPickup.CurrentOption or {}
+                    monitorList = dropdown_selectPetsForMonitor and dropdown_selectPetsForMonitor.CurrentOption or {}
+                    if #pickupList > 0 and #monitorList > 0 then break end
+                    task.wait(0.5)
+                    t += 0.5
+                end
                 if #pickupList == 0 or #monitorList == 0 then
                     beastHubNotify("Missing Setup, please select pets to pick and place", "", 3)
                     return
                 end
+
 
                 autoPickupThread = task.spawn(function()
                     while autoPickupEnabled and M.isSafeToPickPlace do
@@ -326,7 +332,8 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             local sessionFirstCast = true
 
                             --if ready
-                            if animIndex == 1 then
+                            if animIndex == 1 and sessionFirstCast then
+                                sessionFirstCast = false
                                 --pickup loop here
                                 print("pet ready detected!")
                                 for _, pickupEntry in ipairs(pickupList) do
@@ -355,9 +362,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
                                     task.wait()
                                 end
-                                -- sessionFirstCast = false
-                            -- else
-                            --     sessionFirstCast = true
+                                sessionFirstCast = false
+                            else
+                                sessionFirstCast = true
                             end
                             
 
