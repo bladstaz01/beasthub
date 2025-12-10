@@ -266,7 +266,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                     if position then
                         -- print("Current animation index:", position)
-                        beastHubNotify("Current animation index: "..tostring(position) or "", "", 3)
+                        -- beastHubNotify("Current animation index: "..tostring(position) or "", "", 3)
                     else
                         -- print("Current animation not found in LoadedAnimations")
                     end
