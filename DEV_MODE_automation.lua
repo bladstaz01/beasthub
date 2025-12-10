@@ -189,7 +189,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
 
 
-    Automation:CreateDivider()
+    -- Automation:CreateDivider()
     
     --Auto Pet boos
     Automation:CreateSection("Auto Pet Boost")
@@ -1165,7 +1165,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     Automation:CreateSection("Auto Loadout Switcher (Standalone)")
     local switcher1 = Automation:CreateDropdown({
         Name = "First loadout",
-        Options = {"custom_1","custom_2","custom_3","custom_4"},
+        Options = {"1", "2", "3", "4", "5", "6", "custom_1","custom_2","custom_3","custom_4"},
         CurrentOption = {},
         MultipleOptions = false,
         Flag = "firstLoadoutAutoSwitch", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
@@ -1187,7 +1187,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     })
     local switcher2 = Automation:CreateDropdown({
         Name = "Second loadout",
-        Options = {"custom_1","custom_2","custom_3","custom_4"},
+        Options = {"1", "2", "3", "4", "5", "6", "custom_1","custom_2","custom_3","custom_4"},
         CurrentOption = {},
         MultipleOptions = false,
         Flag = "secondLoadoutAutoSwitch", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
