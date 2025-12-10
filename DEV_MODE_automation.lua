@@ -339,7 +339,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     while autoPickupEnabled and M.isSafeToPickPlace do
                         for _, monitorEntry in ipairs(monitorList) do
                             if not autoPickupEnabled or justCasted then
-                                beastHubNotify("Waiting for next cast delay","delay: "..tostring(delayForNextPickup), delayForNextPickup)
+                                -- beastHubNotify("Waiting for next cast delay","delay: "..tostring(delayForNextPickup), delayForNextPickup)
                                 task.wait(delayForNextPickup)
                                 justCasted = false
                                 break
