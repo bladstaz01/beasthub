@@ -1,5 +1,7 @@
 local M = {}
 
+M.isSafeToPickPlace = true
+
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook)
     local Automation = Window:CreateTab("Automation", "bot")
     
@@ -187,11 +189,131 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         end,
     })
 
+    -- Auto PickUp toggle variables
+    local autoPickupEnabled = false
+    local autoPickupThread = nil
+    Automation:CreateToggle({
+        Name = "Auto Pick Up",
+        CurrentValue = false,
+        Flag = "autoPickup",
+        Callback = function(Value)
+            autoPickupEnabled = Value
 
+            if autoPickupEnabled then
+                if autoPickupThread then
+                    return
+                end
 
-    -- Automation:CreateDivider()
+                local function GetAnimationIndexFromUUID(targetUUID)
+                    local modulePath = game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("PetServices"):WaitForChild("ActivePetsService")
+
+                    local service
+                    local ok, res = pcall(function()
+                        return require(modulePath)
+                    end)
+                    if not ok then
+                        warn("ActivePetsService require failed")
+                        return
+                    end
+                    service = res
+
+                    local clientState = service.ClientPetState
+                    if not clientState then
+                        warn("ClientPetState missing")
+                        return
+                    end
+
+                    local foundState = nil
+                    for ownerName, pets in pairs(clientState) do
+                        for uuid, petState in pairs(pets) do
+                            if tostring(uuid) == targetUUID then
+                                foundState = petState
+                                break
+                            end
+                        end
+                        if foundState then
+                            break
+                        end
+                    end
+
+                    if not foundState then
+                        print("UUID not found:", targetUUID)
+                        return
+                    end
+
+                    if not foundState.CurrentAnimation then
+                        print("No CurrentAnimation found")
+                        return
+                    end
+
+                    local currentAnim = foundState.CurrentAnimation
+                    local loaded = foundState.LoadedAnimations
+                    if not loaded or type(loaded) ~= "table" then
+                        print("No LoadedAnimations table")
+                        return
+                    end
+
+                    local index = 0
+                    local position = nil
+
+                    for animName, animObj in pairs(loaded) do
+                        index = index + 1
+                        if animObj == currentAnim then
+                            position = index
+                            break
+                        end
+                    end
+
+                    if position then
+                        -- print("Current animation index:", position)
+                        beastHubNotify("Current animation index: "..tostring(position) or "", "", 3)
+                    else
+                        -- print("Current animation not found in LoadedAnimations")
+                    end
+
+                    return position
+                end
+
+                autoPickupThread = task.spawn(function()
+
+                    while autoPickupEnabled and M.isSafeToPickPlace do
+
+                        local pickupList = dropdown_selectPetsForPickup and dropdown_selectPetsForPickup.CurrentOption or {}
+                        local monitorList = dropdown_selectPetsForMonitor and dropdown_selectPetsForMonitor.CurrentOption or {}
+
+                        if #pickupList == 0 or #monitorList == 0 then
+                            beastHubNotify("Missing Setup, please select pets to pick and place", "", 3)
+                            return
+                        end
+
+                        for _, monitorEntry in ipairs(monitorList) do
+                            if not autoPickupEnabled then
+                                break
+                            end
+
+                            local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
+                            local animIndex = showAnimationIndexByUUID(curMonitorPetId)
+
+                            task.wait(1)
+                        end
+
+                        task.wait(.2)
+                    end
+
+                    autoPickupThread = nil
+                end)
+            else
+                autoPickupEnabled = false
+                autoPickupThread = nil
+            end
+        end
+    })
+    Automation:CreateDivider()
     
-    --Auto Pet boos
+
+
+
+    --Auto Pet boost
     Automation:CreateSection("Auto Pet Boost")
     -- --select pet
     local parag_petsToBoost = Automation:CreateParagraph({
@@ -1162,7 +1284,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     })
     Automation:CreateDivider()
 
-    Automation:CreateSection("Auto Loadout Switcher (Standalone)")
+    Automation:CreateSection("Auto Loadout Switcher (NOT FOR AUTO HATCHING)")
     local switcher1 = Automation:CreateDropdown({
         Name = "First loadout",
         Options = {"1", "2", "3", "4", "5", "6", "custom_1","custom_2","custom_3","custom_4"},
