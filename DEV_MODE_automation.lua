@@ -274,6 +274,23 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     return position
                 end
 
+                local function getPetEquipLocation()
+                    local ok, result = pcall(function()
+                        local spawnCFrame = getFarmSpawnCFrame()
+                        if typeof(spawnCFrame) ~= "CFrame" then
+                            return nil
+                        end
+                        return spawnCFrame * CFrame.new(0, 0, -5)
+                    end)
+                    if ok then
+                        return result
+                    else
+                        warn("EquipLocationError " .. tostring(result))
+                        return nil
+                    end
+                end
+
+                local location = getPetEquipLocation()
                 autoPickupThread = task.spawn(function()
 
                     while autoPickupEnabled and M.isSafeToPickPlace do
@@ -294,10 +311,37 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                             local animIndex = GetAnimationIndexFromUUID(curMonitorPetId)
 
-                            task.wait(1)
+                            --if ready
+                            if animIndex == 1 then
+                                --pickup loop here
+                                for _, pickupEntry in ipairs(pickupList) do
+                                    if not autoPickupEnabled then
+                                        break
+                                    end
+                                    local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
+                                    --UnequipPet
+                                    local args = {
+                                        [1] = "UnequipPet";
+                                        [2] = curPickupPetId;
+                                    }
+                                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args))
+                                    task.wait()
+                                    --equip
+                                    local args2 = {
+                                        [1] = "EquipPet";
+                                        [2] = "{aa35abb4-6683-4660-8126-967dfdaee724}";
+                                        [3] = location;
+                                    }
+                                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
+
+                                end
+                            end
+                            
+
+                            task.wait()
                         end
 
-                        task.wait(.2)
+                        task.wait(.1)
                     end
 
                     autoPickupThread = nil
