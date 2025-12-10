@@ -290,6 +290,16 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     end
                 end
 
+                local function equipPetByUuid(uuid)
+                    local player = game.Players.LocalPlayer
+                    local backpack = player:WaitForChild("Backpack")
+                    for _, tool in ipairs(backpack:GetChildren()) do
+                        if tool:GetAttribute("PET_UUID") == uuid then
+                            player.Character.Humanoid:EquipTool(tool)
+                        end
+                    end
+                end
+
                 local location = getPetEquipLocation()
                 autoPickupThread = task.spawn(function()
 
@@ -326,10 +336,12 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     }
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args))
                                     task.wait()
-                                    --equip
+                                    --equip to hand
+                                    -- equipPetByUuid(curPickupPetId)
+                                    --equip to farm
                                     local args2 = {
                                         [1] = "EquipPet";
-                                        [2] = "{aa35abb4-6683-4660-8126-967dfdaee724}";
+                                        [2] = curPickupPetId;
                                         [3] = location;
                                     }
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
