@@ -292,7 +292,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             end
 
                             local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
-                            local animIndex = showAnimationIndexByUUID(curMonitorPetId)
+                            local animIndex = GetAnimationIndexFromUUID(curMonitorPetId)
 
                             task.wait(1)
                         end
