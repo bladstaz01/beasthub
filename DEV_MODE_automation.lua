@@ -335,6 +335,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     end
                                     local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                                     --UnequipPet
+                                    beastHubNotify("Unequipping pet", "", 1)
                                     local args = {
                                         [1] = "UnequipPet";
                                         [2] = curPickupPetId;
@@ -342,8 +343,10 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args))
                                     task.wait()
                                     --equip to hand
+                                    beastHubNotify("Equipping pet", "", 1)
                                     equipPetByUuid(curPickupPetId)
                                     --equip to farm
+                                    beastHubNotify("Dropping pet to garden", "", 1)
                                     local args2 = {
                                         [1] = "EquipPet";
                                         [2] = curPickupPetId;
@@ -358,10 +361,10 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             end
                             
 
-                            task.wait(5)
+                            task.wait()
                         end
 
-                        task.wait(.01)
+                        task.wait()
                     end
 
                     autoPickupThread = nil
