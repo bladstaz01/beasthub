@@ -100,7 +100,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     --when ready
     Automation:CreateDivider()
     local parag_petsToMonitor = Automation:CreateParagraph({
-        Title = "Monitor Pet:",
+        Title = "When ready:",
         Content = "None"
     })
     local dropdown_selectPetsForMonitor = Automation:CreateDropdown({
@@ -116,7 +116,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             end
 
             parag_petsToMonitor:Set({
-                Title = "Monitor Pet:",
+                Title = "When ready:",
                 Content = listText
             })
         end,
@@ -183,7 +183,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         Callback = function()
             dropdown_selectPetsForMonitor:Set({})
             parag_petsToMonitor:Set({
-                Title = "Monitor Pet:",
+                Title = "When ready:",
                 Content = "None"
             })
         end,
