@@ -292,26 +292,30 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     if not autoPickupEnabled then break end
                                     local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
 
-                                    -- Unequip pet
-                                    beastHubNotify("Picking up!","",3)
-                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curPickupPetId)
-                                    task.wait()
-                                    -- Equip to hand
-                                    equipPetByUuid(curPickupPetId)
-                                    task.wait()
-                                    -- Equip to farm
-                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
-                                    task.wait()
+                                    if M.isSafeToPickPlace then
+                                        -- Unequip pet
+                                        beastHubNotify("Picking up!","",3)
+                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curPickupPetId)
+                                        task.wait()
+                                        -- Equip to hand
+                                        equipPetByUuid(curPickupPetId)
+                                        task.wait()
+                                        -- Equip to farm
+                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
+                                        task.wait()
+                                    end
                                     
                                     task.wait(.5)
 
-                                    --for the monitoring pet
-                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curMonitorPetId)
-                                    task.wait()
-                                    equipPetByUuid(curMonitorPetId)
-                                    task.wait()
-                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curMonitorPetId, location)
-                                    task.wait()
+                                    if M.isSafeToPickPlace then
+                                        --for the monitoring pet
+                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curMonitorPetId)
+                                        task.wait()
+                                        equipPetByUuid(curMonitorPetId)
+                                        task.wait()
+                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curMonitorPetId, location)
+                                        task.wait()
+                                    end
 
                                     task.wait(delayForNextPickup)
                                     justCasted = true
