@@ -310,7 +310,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     task.wait()
                                     equipPetByUuid(curMonitorPetId)
                                     task.wait()
-                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
+                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curMonitorPetId, location)
                                     task.wait()
 
                                     task.wait(delayForNextPickup)
