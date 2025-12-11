@@ -91,7 +91,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         Callback = function()
             dropdown_selectPetsForPickup:Set({})
             parag_petsToPickup:Set({
-                Title = "Pet/s to Pickup:",
+                Title = "Pickup:",
                 Content = "None"
             })
         end,
@@ -100,7 +100,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     --when ready
     Automation:CreateDivider()
     local parag_petsToMonitor = Automation:CreateParagraph({
-        Title = "When Ready:",
+        Title = "Monitor Pet:",
         Content = "None"
     })
     local dropdown_selectPetsForMonitor = Automation:CreateDropdown({
@@ -116,7 +116,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             end
 
             parag_petsToMonitor:Set({
-                Title = "When Ready:",
+                Title = "Monitor Pet:",
                 Content = listText
             })
         end,
@@ -183,7 +183,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         Callback = function()
             dropdown_selectPetsForMonitor:Set({})
             parag_petsToMonitor:Set({
-                Title = "Pet/s to Monitor:",
+                Title = "Monitor Pet:",
                 Content = "None"
             })
         end,
@@ -220,7 +220,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     local petCooldowns = {}
     
     Automation:CreateToggle({
-        Name = "Auto Pick Up",
+        Name = "Auto Pick & Place",
         CurrentValue = false,
         Flag = "autoPickup",
         Callback = function(Value)
