@@ -276,7 +276,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     local justCasted = false
                     local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
 
-                    while autoPickupEnabled and M.isSafeToPickPlace do
+                    while autoPickupEnabled do
                         for _, monitorEntry in ipairs(monitorList) do
                             if not autoPickupEnabled or justCasted then
                                 task.wait(delayForNextPickup)
@@ -287,7 +287,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                             local timeLeft = petCooldowns[curMonitorPetId] or 0
 
-                            if (timeLeft == whenPetCdIs or timeLeft == (whenPetCdIs-1) or timeLeft == 0) and not justCasted then
+                            if (timeLeft == whenPetCdIs or timeLeft == (whenPetCdIs-1) or timeLeft == 0) and not justCasted and M.isSafeToPickPlace then
                                 for _, pickupEntry in ipairs(pickupList) do
                                     if not autoPickupEnabled then break end
                                     local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
