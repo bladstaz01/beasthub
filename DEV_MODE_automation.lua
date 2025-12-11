@@ -274,7 +274,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                             local timeLeft = petCooldowns[curMonitorPetId] or 0
 
-                            if timeLeft <= 1 and not justCasted then
+                            if timeLeft <= 5 and not justCasted then
                                 for _, pickupEntry in ipairs(pickupList) do
                                     if not autoPickupEnabled then break end
                                     local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
@@ -289,6 +289,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     -- Equip to farm
                                     game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
                                     task.wait()
+                                    task.wait(delayForNextPickup)
                                     justCasted = true
                                 end
                             end
