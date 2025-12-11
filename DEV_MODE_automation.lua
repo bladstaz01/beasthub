@@ -204,6 +204,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     -- Auto PickUp toggle variables
     local autoPickupEnabled = false
     local autoPickupThread = nil
+    local cooldownListener = nil
+    local petCooldowns = {}
+    
     Automation:CreateToggle({
         Name = "Auto Pick Up",
         CurrentValue = false,
@@ -212,88 +215,39 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             autoPickupEnabled = Value
 
             if autoPickupEnabled then
-                if autoPickupThread then
+                if autoPickupThread then return end
+
+                -- Hook PetCooldownsUpdated
+                cooldownListener = game:GetService("ReplicatedStorage").GameEvents.PetCooldownsUpdated.OnClientEvent:Connect(function(petId, data)
+                    if typeof(data) == "table" and data[1] and data[1].Time then
+                        petCooldowns[petId] = data[1].Time
+                    else
+                        petCooldowns[petId] = 0
+                    end
+                end)
+
+                -- Validate setup
+                local pickupList, monitorList, delayForNextPickup, t = {}, {}, tonumber(nextPickup_delay.CurrentValue), 0
+                while t < 3 do
+                    pickupList = dropdown_selectPetsForPickup.CurrentOption or {}
+                    monitorList = dropdown_selectPetsForMonitor.CurrentOption or {}
+                    delayForNextPickup = tonumber(nextPickup_delay.CurrentValue)
+                    if #pickupList > 0 and #monitorList > 0 then
+                        if not delayForNextPickup then
+                            beastHubNotify("Invalid delay input", "", 3)
+                            return
+                        end
+                        break
+                    end
+                    task.wait(0.5)
+                    t += 0.5
+                end
+                if #pickupList == 0 or #monitorList == 0 then
+                    beastHubNotify("Missing setup, please select pets to pick and place", "", 3)
                     return
                 end
 
-                local function GetAnimationIndexFromUUID(targetUUID)
-                    local modulePath = game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("PetServices"):WaitForChild("ActivePetsService")
-
-                    local service
-                    local ok, res = pcall(function()
-                        return require(modulePath)
-                    end)
-                    if not ok then
-                        warn("ActivePetsService require failed")
-                        return
-                    end
-                    service = res
-
-                    local clientState = service.ClientPetState
-                    if not clientState then
-                        warn("ClientPetState missing")
-                        return
-                    end
-
-                    local foundState = nil
-                    for ownerName, pets in pairs(clientState) do
-                        for uuid, petState in pairs(pets) do
-                            if tostring(uuid) == targetUUID then
-                                foundState = petState
-                                break
-                            end
-                        end
-                        if foundState then
-                            break
-                        end
-                    end
-
-                    if not foundState then
-                        -- print("UUID not found:", targetUUID)
-                        return
-                    end
-
-                    if not foundState.CurrentAnimation then
-                        -- print("No CurrentAnimation found")
-                        return
-                    end
-
-                    local currentAnim = foundState.CurrentAnimation
-                    local loaded = foundState.LoadedAnimations
-                    if not loaded or type(loaded) ~= "table" then
-                        -- print("No LoadedAnimations table")
-                        return
-                    end
-
-                    local index = 0
-                    local position = nil
-
-                    for animName, animObj in pairs(loaded) do
-                        index = index + 1
-                        if animObj == currentAnim then
-                            position = index
-                            break
-                        end
-                    end
-                    return position
-                end
-
-                local function getPetEquipLocation()
-                    local ok, result = pcall(function()
-                        local spawnCFrame = getFarmSpawnCFrame()
-                        if typeof(spawnCFrame) ~= "CFrame" then
-                            return nil
-                        end
-                        return spawnCFrame * CFrame.new(0, 0, -5)
-                    end)
-                    if ok then
-                        return result
-                    else
-                        warn("EquipLocationError " .. tostring(result))
-                        return nil
-                    end
-                end
-
+                -- Equip function
                 local function equipPetByUuid(uuid)
                     local player = game.Players.LocalPlayer
                     local backpack = player:WaitForChild("Backpack")
@@ -304,91 +258,53 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     end
                 end
 
-                -- local location = getPetEquipLocation()
-                local spawnCFrame = getFarmSpawnCFrame()
-                local offset = Vector3.new(8,0,-50)
-                local dropPos = spawnCFrame:PointToWorldSpace(offset)
-                local location = CFrame.new(dropPos)
-
-                local pickupList, monitorList, t = {}, {}, 0
-                local delayForNextPickup
-                while t < 3 do
-                    pickupList = dropdown_selectPetsForPickup and dropdown_selectPetsForPickup.CurrentOption or {}
-                    monitorList = dropdown_selectPetsForMonitor and dropdown_selectPetsForMonitor.CurrentOption or {}
-                    delayForNextPickup = tonumber(nextPickup_delay.CurrentValue)
-                    if #pickupList > 0 and #monitorList > 0 then
-                        if not delayForNextPickup then
-                            beastHubNotify("Invalid delay", "", 3)
-                            return
-                        end
-                        break
-                    end
-                    task.wait(0.5)
-                    t += 0.5
-                end
-
-                if #pickupList == 0 or #monitorList == 0 then
-                    beastHubNotify("Missing Setup, please select pets to pick and place", "", 3)
-                    return
-                end
-
-
-                
+                -- Main auto pickup thread
                 autoPickupThread = task.spawn(function()
-                    local justCasted = false   
+                    local justCasted = false
+                    local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
+
                     while autoPickupEnabled and M.isSafeToPickPlace do
                         for _, monitorEntry in ipairs(monitorList) do
                             if not autoPickupEnabled or justCasted then
-                                -- beastHubNotify("Waiting for next cast delay","delay: "..tostring(delayForNextPickup), delayForNextPickup)
                                 task.wait(delayForNextPickup)
                                 justCasted = false
                                 break
                             end
 
                             local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
-                            local animIndex = GetAnimationIndexFromUUID(curMonitorPetId)
-                        
-                            --if ready
-                            if animIndex == 1 and not justCasted then
-                                --pickup loop here
-                                -- print("pet ready detected!")
+                            local timeLeft = petCooldowns[curMonitorPetId] or 0
+
+                            if timeLeft <= 0 and not justCasted then
                                 for _, pickupEntry in ipairs(pickupList) do
-                                    if not autoPickupEnabled then
-                                        break
-                                    end
+                                    if not autoPickupEnabled then break end
                                     local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
-                                    --UnequipPet
-                                    -- beastHubNotify("Picking up pet", "", 2)
-                                    local args = {
-                                        [1] = "UnequipPet";
-                                        [2] = curPickupPetId;
-                                    }
-                                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args))
+
+                                    -- Unequip pet
+                                    beastHubNotify("Picking up!","",3)
+                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curPickupPetId)
                                     task.wait()
-                                    --equip to hand
-                                    -- beastHubNotify("Equipping pet", "", 1)
+                                    -- Equip to hand
                                     equipPetByUuid(curPickupPetId)
                                     task.wait()
-                                    --equip to farm
-                                    -- beastHubNotify("Placing pet", "", 2)
-                                    local args2 = {
-                                        [1] = "EquipPet";
-                                        [2] = curPickupPetId;
-                                        [3] = location;
-                                    }
-                                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args2))
+                                    -- Equip to farm
+                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
                                     task.wait()
-                                    -- beastHubNotify("Pet placed","", 2)
                                     justCasted = true
                                 end
                             end
                             task.wait()
                         end
+                        task.wait(0.1)
                     end
 
                     autoPickupThread = nil
                 end)
             else
+                -- Disable
+                if cooldownListener then
+                    cooldownListener:Disconnect()
+                    cooldownListener = nil
+                end
                 autoPickupEnabled = false
                 autoPickupThread = nil
             end
