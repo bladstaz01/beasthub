@@ -189,6 +189,18 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         end,
     })
 
+    local when_petCDis = Automation:CreateInput({
+        Name = "When pet cooldown is",
+        CurrentValue = "",
+        PlaceholderText = "seconds",
+        RemoveTextAfterFocusLost = false,
+        Flag = "whenPetCDis",
+        Callback = function(Text)
+        -- The function that takes place when the input is changed
+        -- The variable (Text) is a string for the value in the text box
+        end,
+    })
+
     local nextPickup_delay = Automation:CreateInput({
         Name = "Delay for next Pickup",
         CurrentValue = "",
@@ -227,14 +239,15 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 end)
 
                 -- Validate setup
-                local pickupList, monitorList, delayForNextPickup, t = {}, {}, tonumber(nextPickup_delay.CurrentValue), 0
+                local pickupList, monitorList, delayForNextPickup, whenPetCdIs t = {}, {}, tonumber(nextPickup_delay.CurrentValue), tonumber(when_petCDis.CurrentValue), 0
                 while t < 3 do
                     pickupList = dropdown_selectPetsForPickup.CurrentOption or {}
                     monitorList = dropdown_selectPetsForMonitor.CurrentOption or {}
                     delayForNextPickup = tonumber(nextPickup_delay.CurrentValue)
+                    whenPetCdIs = tonumber(when_petCDis.CurrentValue)
                     if #pickupList > 0 and #monitorList > 0 then
-                        if not delayForNextPickup then
-                            beastHubNotify("Invalid delay input", "", 3)
+                        if not delayForNextPickup or not whenPetCdIs then
+                            beastHubNotify("Invalid delay/cd input", "", 3)
                             return
                         end
                         break
@@ -274,7 +287,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                             local timeLeft = petCooldowns[curMonitorPetId] or 0
 
-                            if timeLeft == 2 and not justCasted then
+                            if timeLeft == whenPetCdIs or if timeLeft == 0 and not justCasted then
                                 for _, pickupEntry in ipairs(pickupList) do
                                     if not autoPickupEnabled then break end
                                     local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
