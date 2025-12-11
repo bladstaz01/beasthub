@@ -302,8 +302,20 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     -- Equip to farm
                                     game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
                                     task.wait()
+                                    
+                                    task.wait(.5)
+
+                                    --for the monitoring pet
+                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curMonitorPetId)
+                                    task.wait()
+                                    equipPetByUuid(curMonitorPetId)
+                                    task.wait()
+                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
+                                    task.wait()
+
                                     task.wait(delayForNextPickup)
                                     justCasted = true
+
                                 end
                             end
                             task.wait()
