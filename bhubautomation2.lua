@@ -1,197 +1,347 @@
 local M = {}
 
+M.isSafeToPickPlace = true
+
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook)
     local Automation = Window:CreateTab("Automation", "bot")
     
-    -- --Auto pick & place
-    -- Automation:CreateSection("Auto Pick & Place")
-    -- local parag_petsToPickup = Automation:CreateParagraph({
-    --     Title = "Pickup:",
-    --     Content = "None"
-    -- })
-    -- local dropdown_selectPetsForPickup = Automation:CreateDropdown({
-    --     Name = "Select Pet/s",
-    --     Options = {},
-    --     CurrentOption = {},
-    --     MultipleOptions = true,
-    --     Flag = "selectPetsForPickUp", 
-    --     Callback = function(Options)
-    --         local listText = table.concat(Options, ", ")
-    --         if listText == "" then
-    --             listText = "None"
-    --         end
+    --Auto pick & place
+    Automation:CreateSection("Auto Pick & Place")
+    local parag_petsToPickup = Automation:CreateParagraph({
+        Title = "Pickup:",
+        Content = "None"
+    })
+    local dropdown_selectPetsForPickup = Automation:CreateDropdown({
+        Name = "Select Pet/s",
+        Options = {},
+        CurrentOption = {},
+        MultipleOptions = true,
+        Flag = "selectPetsForPickUp", 
+        Callback = function(Options)
+            local listText = table.concat(Options, ", ")
+            if listText == "" then
+                listText = "None"
+            end
 
-    --         parag_petsToPickup:Set({
-    --             Title = "Pickup:",
-    --             Content = listText
-    --         })
-    --     end,
+            parag_petsToPickup:Set({
+                Title = "Pickup:",
+                Content = listText
+            })
+        end,
 
-    -- })
-    -- Automation:CreateButton({
-    --     Name = "Refresh list",
-    --     Callback = function()
-    --         local function getPlayerData()
-    --             local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
-    --             local logs = dataService:GetData()
-    --             return logs
-    --         end
+    })
+    Automation:CreateButton({
+        Name = "Refresh list",
+        Callback = function()
+            local function getPlayerData()
+                local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                local logs = dataService:GetData()
+                return logs
+            end
 
-    --         local function equippedPets()
-    --             local playerData = getPlayerData()
-    --             if not playerData.PetsData then
-    --                 warn("PetsData missing")
-    --                 return nil
-    --             end
+            local function equippedPets()
+                local playerData = getPlayerData()
+                if not playerData.PetsData then
+                    warn("PetsData missing")
+                    return nil
+                end
 
-    --             local tempStorage = playerData.PetsData.EquippedPets
-    --             if not tempStorage or type(tempStorage) ~= "table" then
-    --                 warn("EquippedPets missing or invalid")
-    --                 return nil
-    --             end
+                local tempStorage = playerData.PetsData.EquippedPets
+                if not tempStorage or type(tempStorage) ~= "table" then
+                    warn("EquippedPets missing or invalid")
+                    return nil
+                end
 
-    --             local petIdsList = {}
-    --             for _, id in ipairs(tempStorage) do
-    --                 table.insert(petIdsList, id)
-    --             end
+                local petIdsList = {}
+                for _, id in ipairs(tempStorage) do
+                    table.insert(petIdsList, id)
+                end
 
-    --             return petIdsList
-    --         end
+                return petIdsList
+            end
 
-    --         local function getPetNameUsingId(uid)
-    --             local playerData = getPlayerData()
-    --             if playerData.PetsData.PetInventory.Data then
-    --                 local data = playerData.PetsData.PetInventory.Data
-    --                 for id,petData in pairs(data) do
-    --                     if id == uid then
-    --                         return petData.PetType.." > "..petData.PetData.Name.." > "..string.format("%.2f", petData.PetData.BaseWeight * 1.1).."kg"
-    --                     end
-    --                 end
-    --             end
-    --         end
+            local function getPetNameUsingId(uid)
+                local playerData = getPlayerData()
+                if playerData.PetsData.PetInventory.Data then
+                    local data = playerData.PetsData.PetInventory.Data
+                    for id,petData in pairs(data) do
+                        if id == uid then
+                            return petData.PetType.." > "..petData.PetData.Name.." > "..string.format("%.2f", petData.PetData.BaseWeight * 1.1).."kg"
+                        end
+                    end
+                end
+            end
 
-    --         local equipped = equippedPets()
-    --         local namesToId = {}
-    --         for _,id in ipairs(equipped) do
-    --             local petName = getPetNameUsingId(id)
-    --             table.insert(namesToId, petName.." | "..id)
-    --         end
+            local equipped = equippedPets()
+            local namesToId = {}
+            for _,id in ipairs(equipped) do
+                local petName = getPetNameUsingId(id)
+                table.insert(namesToId, petName.." | "..id)
+            end
 
-    --         if equipped and #equipped > 0 then
-    --             dropdown_selectPetsForPickup:Refresh(namesToId)
-    --         else
-    --             beastHubNotify("equipped pets error", "", 3)
-    --         end
-    --     end,
-    -- })
-    -- Automation:CreateButton({
-    --     Name = "Clear Selected",
-    --     Callback = function()
-    --         dropdown_selectPetsForPickup:Set({})
-    --         parag_petsToPickup:Set({
-    --             Title = "Pet/s to Pickup:",
-    --             Content = "None"
-    --         })
-    --     end,
-    -- })
+            if equipped and #equipped > 0 then
+                dropdown_selectPetsForPickup:Refresh(namesToId)
+            else
+                beastHubNotify("equipped pets error", "", 3)
+            end
+        end,
+    })
+    Automation:CreateButton({
+        Name = "Clear Selected",
+        Callback = function()
+            dropdown_selectPetsForPickup:Set({})
+            parag_petsToPickup:Set({
+                Title = "Pickup:",
+                Content = "None"
+            })
+        end,
+    })
 
-    -- --when ready
-    -- Automation:CreateDivider()
-    -- local parag_petsToMonitor = Automation:CreateParagraph({
-    --     Title = "When Ready:",
-    --     Content = "None"
-    -- })
-    -- local dropdown_selectPetsForMonitor = Automation:CreateDropdown({
-    --     Name = "Select Pet/s",
-    --     Options = {},
-    --     CurrentOption = {},
-    --     MultipleOptions = true,
-    --     Flag = "selectPetsForPickMonitor", 
-    --     Callback = function(Options)
-    --         local listText = table.concat(Options, ", ")
-    --         if listText == "" then
-    --             listText = "None"
-    --         end
+    --when ready
+    Automation:CreateDivider()
+    local parag_petsToMonitor = Automation:CreateParagraph({
+        Title = "When ready:",
+        Content = "None"
+    })
+    local dropdown_selectPetsForMonitor = Automation:CreateDropdown({
+        Name = "Select Pet/s",
+        Options = {},
+        CurrentOption = {},
+        MultipleOptions = true,
+        Flag = "selectPetsForPickMonitor", 
+        Callback = function(Options)
+            local listText = table.concat(Options, ", ")
+            if listText == "" then
+                listText = "None"
+            end
 
-    --         parag_petsToMonitor:Set({
-    --             Title = "When Ready:",
-    --             Content = listText
-    --         })
-    --     end,
+            parag_petsToMonitor:Set({
+                Title = "When ready:",
+                Content = listText
+            })
+        end,
 
-    -- })
-    -- Automation:CreateButton({
-    --     Name = "Refresh list",
-    --     Callback = function()
-    --         local function getPlayerData()
-    --             local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
-    --             local logs = dataService:GetData()
-    --             return logs
-    --         end
+    })
+    Automation:CreateButton({
+        Name = "Refresh list",
+        Callback = function()
+            local function getPlayerData()
+                local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                local logs = dataService:GetData()
+                return logs
+            end
 
-    --         local function equippedPets()
-    --             local playerData = getPlayerData()
-    --             if not playerData.PetsData then
-    --                 warn("PetsData missing")
-    --                 return nil
-    --             end
+            local function equippedPets()
+                local playerData = getPlayerData()
+                if not playerData.PetsData then
+                    warn("PetsData missing")
+                    return nil
+                end
 
-    --             local tempStorage = playerData.PetsData.EquippedPets
-    --             if not tempStorage or type(tempStorage) ~= "table" then
-    --                 warn("EquippedPets missing or invalid")
-    --                 return nil
-    --             end
+                local tempStorage = playerData.PetsData.EquippedPets
+                if not tempStorage or type(tempStorage) ~= "table" then
+                    warn("EquippedPets missing or invalid")
+                    return nil
+                end
 
-    --             local petIdsList = {}
-    --             for _, id in ipairs(tempStorage) do
-    --                 table.insert(petIdsList, id)
-    --             end
+                local petIdsList = {}
+                for _, id in ipairs(tempStorage) do
+                    table.insert(petIdsList, id)
+                end
 
-    --             return petIdsList
-    --         end
+                return petIdsList
+            end
 
-    --         local function getPetNameUsingId(uid)
-    --             local playerData = getPlayerData()
-    --             if playerData.PetsData.PetInventory.Data then
-    --                 local data = playerData.PetsData.PetInventory.Data
-    --                 for id,petData in pairs(data) do
-    --                     if id == uid then
-    --                         return petData.PetType.." > "..petData.PetData.Name.." > "..string.format("%.2f", petData.PetData.BaseWeight * 1.1).."kg"
-    --                     end
-    --                 end
-    --             end
-    --         end
+            local function getPetNameUsingId(uid)
+                local playerData = getPlayerData()
+                if playerData.PetsData.PetInventory.Data then
+                    local data = playerData.PetsData.PetInventory.Data
+                    for id,petData in pairs(data) do
+                        if id == uid then
+                            return petData.PetType.." > "..petData.PetData.Name.." > "..string.format("%.2f", petData.PetData.BaseWeight * 1.1).."kg"
+                        end
+                    end
+                end
+            end
 
-    --         local equipped = equippedPets()
-    --         local namesToId = {}
-    --         for _,id in ipairs(equipped) do
-    --             local petName = getPetNameUsingId(id)
-    --             table.insert(namesToId, petName.." | "..id)
-    --         end
+            local equipped = equippedPets()
+            local namesToId = {}
+            for _,id in ipairs(equipped) do
+                local petName = getPetNameUsingId(id)
+                table.insert(namesToId, petName.." | "..id)
+            end
 
-    --         if equipped and #equipped > 0 then
-    --             dropdown_selectPetsForMonitor:Refresh(namesToId)
-    --         else
-    --             beastHubNotify("equipped pets error", "", 3)
-    --         end
-    --     end,
-    -- })
-    -- Automation:CreateButton({
-    --     Name = "Clear Selected",
-    --     Callback = function()
-    --         dropdown_selectPetsForMonitor:Set({})
-    --         parag_petsToMonitor:Set({
-    --             Title = "Pet/s to Monitor:",
-    --             Content = "None"
-    --         })
-    --     end,
-    -- })
+            if equipped and #equipped > 0 then
+                dropdown_selectPetsForMonitor:Refresh(namesToId)
+            else
+                beastHubNotify("equipped pets error", "", 3)
+            end
+        end,
+    })
+    Automation:CreateButton({
+        Name = "Clear Selected",
+        Callback = function()
+            dropdown_selectPetsForMonitor:Set({})
+            parag_petsToMonitor:Set({
+                Title = "When ready:",
+                Content = "None"
+            })
+        end,
+    })
 
+    local when_petCDis = Automation:CreateInput({
+        Name = "When pet cooldown is",
+        CurrentValue = "",
+        PlaceholderText = "seconds",
+        RemoveTextAfterFocusLost = false,
+        Flag = "whenPetCDis",
+        Callback = function(Text)
+        -- The function that takes place when the input is changed
+        -- The variable (Text) is a string for the value in the text box
+        end,
+    })
 
+    local nextPickup_delay = Automation:CreateInput({
+        Name = "Delay for next Pickup",
+        CurrentValue = "",
+        PlaceholderText = "seconds",
+        RemoveTextAfterFocusLost = false,
+        Flag = "nextPickupDelay",
+        Callback = function(Text)
+        -- The function that takes place when the input is changed
+        -- The variable (Text) is a string for the value in the text box
+        end,
+    })
 
-    -- Automation:CreateDivider()
+    -- Auto PickUp toggle variables
+    local autoPickupEnabled = false
+    local autoPickupThread = nil
+    local cooldownListener = nil
+    local petCooldowns = {}
     
-    --Auto Pet boos
+    Automation:CreateToggle({
+        Name = "Auto Pick & Place",
+        CurrentValue = false,
+        Flag = "autoPickup",
+        Callback = function(Value)
+            autoPickupEnabled = Value
+
+            if autoPickupEnabled then
+                if autoPickupThread then return end
+
+                -- Hook PetCooldownsUpdated
+                cooldownListener = game:GetService("ReplicatedStorage").GameEvents.PetCooldownsUpdated.OnClientEvent:Connect(function(petId, data)
+                    if typeof(data) == "table" and data[1] and data[1].Time then
+                        petCooldowns[petId] = data[1].Time
+                    else
+                        petCooldowns[petId] = 0
+                    end
+                end)
+
+                -- Validate setup
+                local pickupList, monitorList, delayForNextPickup, whenPetCdIs, t = {}, {}, tonumber(nextPickup_delay.CurrentValue), tonumber(when_petCDis.CurrentValue), 0
+                while t < 3 do
+                    pickupList = dropdown_selectPetsForPickup.CurrentOption or {}
+                    monitorList = dropdown_selectPetsForMonitor.CurrentOption or {}
+                    delayForNextPickup = tonumber(nextPickup_delay.CurrentValue)
+                    whenPetCdIs = tonumber(when_petCDis.CurrentValue)
+                    if #pickupList > 0 and #monitorList > 0 then
+                        if not delayForNextPickup or not whenPetCdIs then
+                            beastHubNotify("Invalid delay/cd input", "", 3)
+                            return
+                        end
+                        break
+                    end
+                    task.wait(0.5)
+                    t += 0.5
+                end
+                if #pickupList == 0 or #monitorList == 0 then
+                    beastHubNotify("Missing setup, please select pets to pick and place", "", 3)
+                    return
+                end
+
+                -- Equip function
+                local function equipPetByUuid(uuid)
+                    local player = game.Players.LocalPlayer
+                    local backpack = player:WaitForChild("Backpack")
+                    for _, tool in ipairs(backpack:GetChildren()) do
+                        if tool:GetAttribute("PET_UUID") == uuid then
+                            player.Character.Humanoid:EquipTool(tool)
+                        end
+                    end
+                end
+
+                -- Main auto pickup thread
+                autoPickupThread = task.spawn(function()
+                    local justCasted = false
+                    local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
+
+                    while autoPickupEnabled do
+                        for _, monitorEntry in ipairs(monitorList) do
+                            if not autoPickupEnabled or justCasted then
+                                task.wait(delayForNextPickup)
+                                justCasted = false
+                                break
+                            end
+
+                            local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
+                            local timeLeft = petCooldowns[curMonitorPetId] or 0
+
+                            if (timeLeft == whenPetCdIs or timeLeft == (whenPetCdIs-1) or timeLeft == 0) and not justCasted and M.isSafeToPickPlace then
+                                for _, pickupEntry in ipairs(pickupList) do
+                                    if not autoPickupEnabled then break end
+                                    local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
+
+                                    -- Unequip pet
+                                    beastHubNotify("Picking up!","",3)
+                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curPickupPetId)
+                                    task.wait()
+                                    -- Equip to hand
+                                    equipPetByUuid(curPickupPetId)
+                                    task.wait()
+                                    -- Equip to farm
+                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
+                                    task.wait()
+                                    
+                                    task.wait(.5)
+
+                                    --for the monitoring pet
+                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curMonitorPetId)
+                                    task.wait()
+                                    equipPetByUuid(curMonitorPetId)
+                                    task.wait()
+                                    game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curMonitorPetId, location)
+                                    task.wait()
+
+                                    task.wait(delayForNextPickup)
+                                    justCasted = true
+
+                                end
+                            end
+                            task.wait()
+                        end
+                        task.wait(0.1)
+                    end
+
+                    autoPickupThread = nil
+                end)
+            else
+                -- Disable
+                if cooldownListener then
+                    cooldownListener:Disconnect()
+                    cooldownListener = nil
+                end
+                autoPickupEnabled = false
+                autoPickupThread = nil
+            end
+        end
+    })
+    Automation:CreateDivider()
+    
+
+
+
+    --Auto Pet boost
     Automation:CreateSection("Auto Pet Boost")
     -- --select pet
     local parag_petsToBoost = Automation:CreateParagraph({
@@ -1162,7 +1312,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     })
     Automation:CreateDivider()
 
-    Automation:CreateSection("Auto Loadout Switcher (Standalone)")
+    Automation:CreateSection("Static loadout switching (NOT FOR AUTO HATCHING)")
     local switcher1 = Automation:CreateDropdown({
         Name = "First loadout",
         Options = {"1", "2", "3", "4", "5", "6", "custom_1","custom_2","custom_3","custom_4"},
