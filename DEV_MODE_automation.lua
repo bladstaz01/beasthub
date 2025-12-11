@@ -1312,7 +1312,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     })
     Automation:CreateDivider()
 
-    Automation:CreateSection("Auto Loadout Switcher (NOT FOR AUTO HATCHING)")
+    Automation:CreateSection("Static loadout switching (NOT FOR AUTO HATCHING)")
     local switcher1 = Automation:CreateDropdown({
         Name = "First loadout",
         Options = {"1", "2", "3", "4", "5", "6", "custom_1","custom_2","custom_3","custom_4"},
