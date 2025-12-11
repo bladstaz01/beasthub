@@ -239,7 +239,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 end)
 
                 -- Validate setup
-                local pickupList, monitorList, delayForNextPickup, whenPetCdIs t = {}, {}, tonumber(nextPickup_delay.CurrentValue), tonumber(when_petCDis.CurrentValue), 0
+                local pickupList, monitorList, delayForNextPickup, whenPetCdIs, t = {}, {}, tonumber(nextPickup_delay.CurrentValue), tonumber(when_petCDis.CurrentValue), 0
                 while t < 3 do
                     pickupList = dropdown_selectPetsForPickup.CurrentOption or {}
                     monitorList = dropdown_selectPetsForMonitor.CurrentOption or {}
@@ -287,7 +287,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                             local timeLeft = petCooldowns[curMonitorPetId] or 0
 
-                            if timeLeft == whenPetCdIs or if timeLeft == 0 and not justCasted then
+                            if (timeLeft == whenPetCdIs or timeLeft == 0) and not justCasted then
                                 for _, pickupEntry in ipairs(pickupList) do
                                     if not autoPickupEnabled then break end
                                     local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
