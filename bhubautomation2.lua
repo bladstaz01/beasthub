@@ -271,6 +271,44 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     end
                 end
 
+                local function isEquipped(uuid)
+                    local function getPlayerData()
+                        local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                        local logs = dataService:GetData()
+                        return logs
+                    end
+                    
+                    local function equippedPets()
+                        local playerData = getPlayerData()
+                        if not playerData.PetsData then
+                            warn("PetsData missing")
+                            return nil
+                        end
+
+                        local tempStorage = playerData.PetsData.EquippedPets
+                        if not tempStorage or type(tempStorage) ~= "table" then
+                            warn("EquippedPets missing or invalid")
+                            return nil
+                        end
+
+                        local petIdsList = {}
+                        for _, id in ipairs(tempStorage) do
+                            table.insert(petIdsList, id)
+                        end
+
+                        return petIdsList
+                    end
+
+                    local equippedPets = equippedPets()
+                    for _,id in ipairs(equippedPets) do
+                        if id == uuid then
+                            return true
+                        end
+                    end
+
+                    return false
+                end
+
                 -- Main auto pickup thread
                 autoPickupThread = task.spawn(function()
                     local justCasted = false
@@ -292,10 +330,12 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     for _, pickupEntry in ipairs(pickupList) do
                                         if not autoPickupEnabled then break end
                                         local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
+                                        local isCurPicked = false
 
-                                        if M.isSafeToPickPlace then
+                                        if M.isSafeToPickPlace and isEquipped(curPickupPetId) then
                                             -- Unequip pet
-                                            beastHubNotify("Picking up!","",3)
+                                            beastHubNotify("Picking up!","",1)
+                                            isCurPicked = true
                                             game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curPickupPetId)
                                             task.wait()
                                             -- Equip to hand
@@ -308,7 +348,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                         
                                         task.wait(.5)
 
-                                        if M.isSafeToPickPlace then
+                                        if M.isSafeToPickPlace and isCurPicked then
                                             --for the monitoring pet
                                             game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curMonitorPetId)
                                             task.wait()
