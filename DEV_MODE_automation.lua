@@ -272,6 +272,12 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 end
 
                 local function isEquipped(uuid)
+                    local function getPlayerData()
+                        local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                        local logs = dataService:GetData()
+                        return logs
+                    end
+                    
                     local function equippedPets()
                         local playerData = getPlayerData()
                         if not playerData.PetsData then
