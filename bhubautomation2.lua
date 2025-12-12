@@ -277,53 +277,56 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
 
                     while autoPickupEnabled do
-                        for _, monitorEntry in ipairs(monitorList) do
-                            if not autoPickupEnabled or justCasted then
-                                task.wait(delayForNextPickup)
-                                justCasted = false
-                                break
-                            end
-
-                            local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
-                            local timeLeft = petCooldowns[curMonitorPetId] or 0
-
-                            if (timeLeft == whenPetCdIs or timeLeft == (whenPetCdIs-1) or timeLeft == 0) and not justCasted and M.isSafeToPickPlace then
-                                for _, pickupEntry in ipairs(pickupList) do
-                                    if not autoPickupEnabled then break end
-                                    local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
-
-                                    if M.isSafeToPickPlace then
-                                        -- Unequip pet
-                                        beastHubNotify("Picking up!","",3)
-                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curPickupPetId)
-                                        task.wait()
-                                        -- Equip to hand
-                                        equipPetByUuid(curPickupPetId)
-                                        task.wait()
-                                        -- Equip to farm
-                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
-                                        task.wait()
-                                    end
-                                    
-                                    task.wait(.5)
-
-                                    if M.isSafeToPickPlace then
-                                        --for the monitoring pet
-                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curMonitorPetId)
-                                        task.wait()
-                                        equipPetByUuid(curMonitorPetId)
-                                        task.wait()
-                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curMonitorPetId, location)
-                                        task.wait()
-                                    end
-
+                        if M.isSafeToPickPlace then
+                            for _, monitorEntry in ipairs(monitorList) do
+                                if not autoPickupEnabled or justCasted then
                                     task.wait(delayForNextPickup)
-                                    justCasted = true
-
+                                    justCasted = false
+                                    break
                                 end
+
+                                local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
+                                local timeLeft = petCooldowns[curMonitorPetId] or 0
+
+                                if (timeLeft == whenPetCdIs or timeLeft == (whenPetCdIs-1) or timeLeft == 0) and not justCasted and M.isSafeToPickPlace then
+                                    for _, pickupEntry in ipairs(pickupList) do
+                                        if not autoPickupEnabled then break end
+                                        local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
+
+                                        if M.isSafeToPickPlace then
+                                            -- Unequip pet
+                                            beastHubNotify("Picking up!","",3)
+                                            game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curPickupPetId)
+                                            task.wait()
+                                            -- Equip to hand
+                                            equipPetByUuid(curPickupPetId)
+                                            task.wait()
+                                            -- Equip to farm
+                                            game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
+                                            task.wait()
+                                        end
+                                        
+                                        task.wait(.5)
+
+                                        if M.isSafeToPickPlace then
+                                            --for the monitoring pet
+                                            game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curMonitorPetId)
+                                            task.wait()
+                                            equipPetByUuid(curMonitorPetId)
+                                            task.wait()
+                                            game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curMonitorPetId, location)
+                                            task.wait()
+                                        end
+
+                                        task.wait(delayForNextPickup)
+                                        justCasted = true
+
+                                    end
+                                end
+                                task.wait()
                             end
-                            task.wait()
                         end
+                        
                         task.wait(0.1)
                     end
 
