@@ -110,6 +110,8 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     end
 
                     local ok, err = pcall(function()
+                        equipItemByName("Player Gift")
+                        task.wait(0.2)
                         tryUseGear:FireServer("Player Gift", targetPlayer)
                     end)
 
@@ -140,8 +142,25 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     })
     Event:CreateDivider()
 
+    --Event Shop
+    Event:CreateButton({
+        Name = "Test",
+        Callback = function()
+            local function getEventItems()
+                local ReplicatedStorage = game:GetService("ReplicatedStorage") 
+                local eventItemList = require(ReplicatedStorage.Data.EventShopData)
+                local listItems = {}
 
+                for _, item in pairs(eventItemList) do
+                    table.insert(listItems, item)
+                    print(tostring(item))
+                end
+                return listItems
+            end
 
+            local allShopItems = getEventItems()
+        end,
+    })
 
 end
 
