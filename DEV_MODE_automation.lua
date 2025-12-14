@@ -325,8 +325,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                                 local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                                 local timeLeft = petCooldowns[curMonitorPetId] or 0
-
+                                beastHubNotify("timeLeft: "..timeLeft, "",1)
                                 if (timeLeft == whenPetCdIs or timeLeft == (whenPetCdIs-1) or timeLeft == 0) and not justCasted and M.isSafeToPickPlace then
+                                    beastHubNotify("timeLeft TRUE: "..timeLeft, "",1)
                                     for _, pickupEntry in ipairs(pickupList) do
                                         if not autoPickupEnabled then break end
                                         local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
@@ -363,7 +364,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                                     end
                                 end
-                                task.wait()
+                                task.wait(.25)
                             end
                         end
                         
