@@ -144,7 +144,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
     --Event Shop
     Event:CreateButton({
-        Name = "Test",
+        Name = "Test2",
         Callback = function()
             local function getEventItems()
                 local ReplicatedStorage = game:GetService("ReplicatedStorage") 
