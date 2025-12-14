@@ -143,6 +143,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     Event:CreateDivider()
 
     --Event Shop
+    Event:CreateSection("Event Shop")
     Event:CreateButton({
         Name = "Test2",
         Callback = function()
