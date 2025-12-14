@@ -4,6 +4,7 @@ local M = {}
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook)
     local Event = Window:CreateTab("Event", "gift")
 
+    Event:CreateSection("Christmas Event - Auto Player Gift")
     local receiver_name = Event:CreateInput({
         Name = "Receiver Username",
         CurrentValue = "",
@@ -137,7 +138,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             end
         end,
     })
-
+    Event:CreateDivider()
 
 
 
