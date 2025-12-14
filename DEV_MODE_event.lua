@@ -145,17 +145,21 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     --Event Shop
     Event:CreateSection("Event Shop")
     Event:CreateButton({
-        Name = "Test2",
+        Name = "Test3",
         Callback = function()
             local function getEventItems()
                 local ReplicatedStorage = game:GetService("ReplicatedStorage") 
-                local eventType = require(ReplicatedStorage.Data.EventShopData)
+                local dataTbl = require(ReplicatedStorage.Data.EventShopData)
                 local listItems = {}
 
-                for _, item in pairs(eventType) do
-                    local itemToType = tostring(item) or "" .." | ".. tostring(item.ItemType) or ""
-                    table.insert(listItems, itemToType)
-                    print(tostring(itemToType))
+                for _, eventType in pairs(dataTbl) do
+                    for _,item in ipairs(eventType) do
+                        local itemToType = tostring(item) or "" .." | ".. tostring(item.ItemType) or ""
+                        table.insert(listItems, itemToType)
+                        print(tostring(itemToType))
+                    end
+
+                    
                 end
                 return listItems
             end
