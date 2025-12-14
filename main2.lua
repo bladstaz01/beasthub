@@ -45,82 +45,11 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, reloadScript, bea
     local RunService = game:GetService("RunService")
 
     local Main = Window:CreateTab("Main", "home")
-    -- Main>Script
-    Main:CreateSection("Script")
-    --==
-    Main:CreateButton({
-        Name = "Reload Script",
-        Callback = function()
-            print("Reloading BeastHub..")
-            Rayfield:Notify({
-                Title = "BeastHub",
-                Content = "Updating script..",
-                Duration = 4,
-                Image = beastHubIcon
-            })
-            task.wait(2)
-            reloadScript("Reload")
-        end
-    })
-    local Slider_walkSpeed = nil
-    local Slider_jumpPower = nil
-    local Toggle_infiniteJump = nil
-    local Toggle_fly = nil
-
-    Main:CreateButton({
-        Name = "Reset All Settings",
-        Callback = function()
-            -- ===Reset config button
-            local function resetPlayerDefaults()
-                local default_walkSpeed = 20
-                local default_jumpPower = 50
-
-                Slider_walkSpeed:Set(default_walkSpeed)
-                Slider_jumpPower:Set(default_jumpPower)
-                Toggle_infiniteJump:Set(false)
-                Toggle_fly:Set(false)
-                return
-            end
-
-            local path = "BeastHub/userConfig.rfld" -- adjust extension if needed
-            if isfile and delfile then
-                if isfile(path) then
-                    delfile(path)
-                    task.wait(.5)
-                    reloadScript("Reset config")
-                    task.wait(.5)
-                    Rayfield:Notify({
-                        Title = "BeastHub",
-                        Content = "Some player effects need game rejoin to fully reset",
-                        Duration = 5,
-                        Image = beastHubIcon
-                    })
-                    resetPlayerDefaults()
-                end
-            end
-        end
-    })
-
-    -- Exit Script
-    Main:CreateButton({
-        Name = "Exit Script",
-        Image = "badge-x",
-        Callback = function()
-            print("Closing BeastHub..")
-            closeScript()
-            -- Destroy Luck GUI
-            if luckGUI and luckGUI.Parent then
-                luckGUI:Destroy()
-                print("Luck GUI destroyed")
-            end
-        end
-    })
-    local Paragraph = Main:CreateParagraph({Title = "Shortcut Key = H", Content = "Press H in keyboard to hide/unhide script interface"})
+    
 
     -- Main>Player
-    Main:CreateDivider()
     Main:CreateSection("Player")
-    -- local Label_player = Main:CreateLabel("Player")
+    local Paragraph = Main:CreateParagraph({Title = "Shortcut Key = H", Content = "Press H in keyboard to hide/unhide script interface"})
 
     --=== WalkSpeed Slider
     Slider_walkSpeed = Main:CreateSlider({
@@ -278,22 +207,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, reloadScript, bea
     })
     local Paragraph = Main:CreateParagraph({Title = "Dash", Content = "F key shortcut for Fly. Left Shift key to Dash while Walking or Flying."})
 
-    -- F listener
-    UserInputService.InputBegan:Connect(function(input, processed)
-        if processed then return end
-        if input.KeyCode == Enum.KeyCode.F then
-            Toggle_fly:Set(not flying)
-        end
-    end)
-
-    -- Continuously enforce noclip while flying
-    RunService.Stepped:Connect(function()
-        if flying and character then
-            myFunctions.setNoclip(flying)
-        end
-    end)
-
-
     -- Main>Server
     Main:CreateDivider()
     Main:CreateSection("Server")
@@ -331,6 +244,93 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, reloadScript, bea
         end,
     })
     local Paragraph = Main:CreateParagraph({Title = "Note:", Content = "Auto rejoin will activate continuously upon game rejoin unless you turn it off."})
+    Main:CreateDivider()
+
+    -- F listener
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+        if input.KeyCode == Enum.KeyCode.F then
+            Toggle_fly:Set(not flying)
+        end
+    end)
+
+    -- Continuously enforce noclip while flying
+    RunService.Stepped:Connect(function()
+        if flying and character then
+            myFunctions.setNoclip(flying)
+        end
+    end)
+
+    -- Main>Script
+    Main:CreateSection("Script")
+    --==
+    Main:CreateButton({
+        Name = "Reload Script",
+        Callback = function()
+            print("Reloading BeastHub..")
+            Rayfield:Notify({
+                Title = "BeastHub",
+                Content = "Updating script..",
+                Duration = 4,
+                Image = beastHubIcon
+            })
+            task.wait(2)
+            reloadScript("Reload")
+        end
+    })
+    local Slider_walkSpeed = nil
+    local Slider_jumpPower = nil
+    local Toggle_infiniteJump = nil
+    local Toggle_fly = nil
+
+    Main:CreateButton({
+        Name = "Reset All Settings",
+        Callback = function()
+            -- ===Reset config button
+            local function resetPlayerDefaults()
+                local default_walkSpeed = 20
+                local default_jumpPower = 50
+
+                Slider_walkSpeed:Set(default_walkSpeed)
+                Slider_jumpPower:Set(default_jumpPower)
+                Toggle_infiniteJump:Set(false)
+                Toggle_fly:Set(false)
+                return
+            end
+
+            local path = "BeastHub/userConfig.rfld" -- adjust extension if needed
+            if isfile and delfile then
+                if isfile(path) then
+                    delfile(path)
+                    task.wait(.5)
+                    reloadScript("Reset config")
+                    task.wait(.5)
+                    Rayfield:Notify({
+                        Title = "BeastHub",
+                        Content = "Some player effects need game rejoin to fully reset",
+                        Duration = 5,
+                        Image = beastHubIcon
+                    })
+                    resetPlayerDefaults()
+                end
+            end
+        end
+    })
+
+    -- Exit Script
+    Main:CreateButton({
+        Name = "Exit Script",
+        Image = "badge-x",
+        Callback = function()
+            print("Closing BeastHub..")
+            closeScript()
+            -- Destroy Luck GUI
+            if luckGUI and luckGUI.Parent then
+                luckGUI:Destroy()
+                print("Luck GUI destroyed")
+            end
+        end
+    })
     Main:CreateDivider()
 end
 
