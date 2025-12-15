@@ -202,6 +202,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     return false
                 end
                 
+                beastHubNotify("Cancel animation running", "", 3)
                 local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
 
                 -- Main auto pickup thread
@@ -560,7 +561,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     return false
                 end
                 
-                local animationCancelDelay = animation_cancelDelay.CurrentValue or 0
+                beastHubNotify("Auto Pick/place running", "", 3)
                 local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
 
                 -- Main auto pickup thread
@@ -761,7 +762,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 if autoPetBoostThread then
                     return
                 end
-
+                beastHubNotify("Auto pet boost running", "", 3)
                 autoPetBoostThread = task.spawn(function()
                     local function checkBoostTimeLeft(toyName, petId) 
                         local toyToBoostAmount = {
@@ -914,6 +915,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     ["Grandmaster Sprinkler"] = 600
                 }
 
+                beastHubNotify("Auto sprinkler running", "", 3)
                 local activeSprinklerThreads = {}
 
                 autoSprinklerThread = task.spawn(function()
@@ -973,10 +975,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     Automation:CreateDivider()
 
 
-
     Automation:CreateSection("Custom Loadouts")
-
-    Automation:CreateDivider()
     M.customLoadout1 = Automation:CreateParagraph({Title = "Custom 1:", Content = "None"})
     Automation:CreateButton({
         Name = "Set current Team as Custom 1",
@@ -1703,6 +1702,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     return
                 end
 
+                beastHubNotify("Static switcher running", "", 3)
                 autoSwitcherThread = task.spawn(function()
                     while autoSwitchEnabled do
                         myFunctions.switchToLoadout(loadout1, getFarmSpawnCFrame, beastHubNotify)
@@ -1720,27 +1720,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             end
         end,
     })
-
-
     Automation:CreateDivider()
-
-
-
-    -- Automation:CreateButton({
-    --    Name = "Button Example",
-    --    Callback = function()
-    --    -- The function that takes place when the button is pressed
-    --    end,
-    -- })
-
-    -- Automation:CreateButton({
-    --    Name = "Button Example",
-    --    Callback = function()
-    --    -- The function that takes place when the button is pressed
-    --    end,
-    -- })
-    -- Automation:CreateDivider()
 end
-
 
 return M
