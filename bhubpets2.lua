@@ -881,7 +881,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 return
             end 
 
-            beastHubNotify("Auto leveling start..", "",3)
+            beastHubNotify("Auto level running", "",3)
 
             -- ï¿° Start auto-level thread
             autoLevelThread = task.spawn(function()
@@ -1487,7 +1487,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                 end --autoNM function end
 
-
+                beastHubNotify("Auto NM running", "", 3)
 
                 --MAIN logic
                 autoNMthread = nil
@@ -1998,6 +1998,8 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                 end --autoEle end
 
+                beastHubNotify("Auto Elephant running", "", 3)
+
                 --MAIN logic
                 autoEleThread = nil
                 if autoEleEnabled and not autoEleThread then
@@ -2293,6 +2295,8 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 beastHubNotify("Missing setup!", "Please recheck", 5)
                 return
             end
+
+            beastHubNotify("Auto breaker running", "", 3)
 
             local sacrificePetName = (selectedPetForAgeBreak.CurrentOption[1]:match("^(.-)%s*|") or ""):match("^%s*(.-)%s*$")
             -- local selectedId = idsOnly[selectedIndex]
