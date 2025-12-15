@@ -205,43 +205,38 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
 
                 -- Main auto pickup thread
+                local activeCancelTasks = {}
                 cancelAnimationThread = task.spawn(function()
                     while cancelAnimationEnabled do
                         if M.isSafeToPickPlace then
                             pickupList = dropdown_selectPetsForCancelAnim.CurrentOption or {}
                             for _, pickupEntry in ipairs(pickupList) do
-                                if not cancelAnimationEnabled then
-                                    break
-                                end
-                                local curMonitorPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
-                                local timeLeft = petCooldownsCancelAnim[curMonitorPetId] or 0
-                                if timeLeft == 0 and M.isSafeToPickPlace then
-                                    if not cancelAnimationEnabled then break end
-                                    local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
-                                    local isCurPicked = false
-
-                                    if M.isSafeToPickPlace and isEquipped(curPickupPetId) then
-                                        -- Unequip pet
-                                        task.wait(animDelay)
-                                        -- beastHubNotify("Cancel Anim!","Delay: "..tostring(animDelay) or "",.5)
-                                        isCurPicked = true
-                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curPickupPetId)
-                                        task.wait()
-                                        -- Equip to hand
-                                        equipPetByUuid(curPickupPetId)
-                                        task.wait()
-                                        -- Equip to farm
-                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
-                                        task.wait()
+                                if not cancelAnimationEnabled then break end
+                                local petId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
+                                if not activeCancelTasks[petId] then
+                                    local timeLeft = petCooldownsCancelAnim[petId] or 0
+                                    if timeLeft == 0 and isEquipped(petId) then
+                                        activeCancelTasks[petId] = true
+                                        task.spawn(function()
+                                            task.wait(animDelay)
+                                            if cancelAnimationEnabled and M.isSafeToPickPlace then
+                                                game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", petId)
+                                                task.wait()
+                                                equipPetByUuid(petId)
+                                                task.wait()
+                                                game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", petId, location)
+                                            end
+                                            activeCancelTasks[petId] = nil
+                                        end)
                                     end
                                 end
                             end
                         end
-                        task.wait(0.01)
+                        task.wait(0.05)
                     end
-
                     cancelAnimationThread = nil
                 end)
+
             else
                 -- Disable
                 if cooldownListenerCancelAnim then
