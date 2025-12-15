@@ -2237,7 +2237,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         end,
     })
 
-
     local petAgeLevelSacrifice = Pets:CreateInput({
         Name = "Sacrifice Below Level:",
         CurrentValue = "",
@@ -2247,6 +2246,16 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         Callback = function(Text)
         -- The function that takes place when the input is changed
         -- The variable (Text) is a string for the value in the text box
+        end,
+    })
+    
+    local toggle_autoSkipViaToken = Pets:CreateToggle({
+        Name = "Auto Skip via Token (49 per skip)",
+        CurrentValue = false,
+        Flag = "autoSkipPetAgeWithToken", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+        Callback = function(Value)
+        -- The function that takes place when the toggle is pressed
+        -- The variable (Value) is a boolean on whether the toggle is true or false
         end,
     })
 
@@ -2330,26 +2339,22 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     end
                 end
 
-                -- beastHubNotify("Selected: ",selectedPetForAgeBreak.CurrentOption[1], 3)
-
-
                 local petIdToSacrifice = getPetIdByNameAndFilterKg(sacrificePetNameParam, tonumber(petAgeKGsacrifice.CurrentOption[1]), tonumber(petAgeLevelSacrifice.CurrentValue), selectedIdParam)
-                -- print("petIdToSacrifice")
-                -- print(tostring(petIdToSacrifice)) 
-                
+            
                 if petIdToSacrifice and autoPetAgeBreakEnabled then
                     beastHubNotify("Worthy sacrifice found!","",3)
-                    task.wait(2)
+                    task.wait(1)
                     --do the remotes here
                     --check if machine is ready, if same id, continue monitoring
                     local playerData = getPlayerData()
+                    task.wait(1)
                     if playerData.PetAgeBreakMachine then
-                        print("pet age breaker machine found")
+                        -- print("pet age breaker machine found")
                         if playerData.PetAgeBreakMachine.IsRunning then
-                            print("breaker machine is already running")
-                            local runningId = playerData.PetAgeBreakMachine.SubmittedPet.UUID
+                            -- print("breaker machine is already running")
+                            local runningId = playerData.PetAgeBreakMachine.SubmittedPet.UUID or ""
                             if runningId == selectedIdParam then
-                                print("the selected pet is already running in breaker machine")
+                                beastHubNotify("the selected pet is already running in breaker machine", "", 3)
                                 --wait until machine is done
                             else
                                 beastHubNotify("A different pet is already running", "waiting for breaker to be done", "3")
@@ -2359,7 +2364,16 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             --monitor machine
                             while autoPetAgeBreakEnabled do 
                                 beastHubNotify("Waiting for breaker to be ready", "", 3)
-                                task.wait(30)
+                                task.wait(5)
+                                if toggle_autoSkipViaToken.CurrentValue and playerData.PetAgeBreakMachine.IsRunning then
+                                    runningId = playerData.PetAgeBreakMachine.SubmittedPet.UUID or ""
+                                    -- beastHubNotify("to skip here", "", 3)
+                                    local ok,err = pcall(function()
+                                        game:GetService("ReplicatedStorage").GameEvents.TradeEvents.TradeTokens.Purchase:InvokeServer(3453278902)
+                                    end)
+                                    if not ok then warn(err) end
+                                end
+                                task.wait(5)
                                 playerData = getPlayerData()
                                 if not playerData.PetAgeBreakMachine.IsRunning then
                                     break
@@ -2420,7 +2434,16 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             --monitor machine for newly submitted
                             while autoPetAgeBreakEnabled do 
                                 beastHubNotify("Waiting for breaker to be ready", "", 3)
-                                task.wait(30)
+                                task.wait(5)
+                                if toggle_autoSkipViaToken.CurrentValue and playerData.PetAgeBreakMachine.IsRunning then
+                                    runningId = playerData.PetAgeBreakMachine.SubmittedPet.UUID or ""
+                                    -- beastHubNotify("to skip here", "", 3)
+                                    local ok,err = pcall(function()
+                                        game:GetService("ReplicatedStorage").GameEvents.TradeEvents.TradeTokens.Purchase:InvokeServer(3453278902)
+                                    end)
+                                    if not ok then warn(err) end
+                                end
+                                task.wait(5)
                                 playerData = getPlayerData()
                                 if not playerData.PetAgeBreakMachine.IsRunning then
                                     break
@@ -2431,6 +2454,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                             if autoPetAgeBreakEnabled then
                                 game:GetService("ReplicatedStorage").GameEvents.PetAgeLimitBreak_Claim:FireServer()
                                 beastHubNotify("Claimed ready pet in breaker", "", 3)
+                                task.wait(5)
                             end
 
                         end
