@@ -5,8 +5,261 @@ M.isSafeToPickPlace = true
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook)
     local Automation = Window:CreateTab("Automation", "bot")
     
+    
+    --Cancel Animation
+    Automation:CreateSection("Cancel READY Animation (Quick Cast)")
+    local parag_cancelAnim = Automation:CreateParagraph({
+        Title = "Pickup/Place:",
+        Content = "None"
+    })
+    local dropdown_selectPetsForCancelAnim = Automation:CreateDropdown({
+        Name = "Select Pet/s",
+        Options = {},
+        CurrentOption = {},
+        MultipleOptions = true,
+        Flag = "selectPetsForCancelAnim", 
+        Callback = function(Options)
+            local listText = table.concat(Options, ", ")
+            if listText == "" then
+                listText = "None"
+            end
+
+            parag_cancelAnim:Set({
+                Title = "Pickup/Place:",
+                Content = listText
+            })
+        end,
+
+    })
+    Automation:CreateButton({
+        Name = "Refresh list",
+        Callback = function()
+            local function getPlayerData()
+                local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                local logs = dataService:GetData()
+                return logs
+            end
+
+            local function equippedPets()
+                local playerData = getPlayerData()
+                if not playerData.PetsData then
+                    warn("PetsData missing")
+                    return nil
+                end
+
+                local tempStorage = playerData.PetsData.EquippedPets
+                if not tempStorage or type(tempStorage) ~= "table" then
+                    warn("EquippedPets missing or invalid")
+                    return nil
+                end
+
+                local petIdsList = {}
+                for _, id in ipairs(tempStorage) do
+                    table.insert(petIdsList, id)
+                end
+
+                return petIdsList
+            end
+
+            local function getPetNameUsingId(uid)
+                local playerData = getPlayerData()
+                if playerData.PetsData.PetInventory.Data then
+                    local data = playerData.PetsData.PetInventory.Data
+                    for id,petData in pairs(data) do
+                        if id == uid then
+                            return petData.PetType.." > "..petData.PetData.Name.." > "..string.format("%.2f", petData.PetData.BaseWeight * 1.1).."kg"
+                        end
+                    end
+                end
+            end
+
+            local equipped = equippedPets()
+            local namesToId = {}
+            for _,id in ipairs(equipped) do
+                local petName = getPetNameUsingId(id)
+                table.insert(namesToId, petName.." | "..id)
+            end
+
+            if equipped and #equipped > 0 then
+                dropdown_selectPetsForCancelAnim:Refresh(namesToId)
+            else
+                beastHubNotify("equipped pets error", "", 3)
+            end
+        end,
+    })
+    Automation:CreateButton({
+        Name = "Clear Selected",
+        Callback = function()
+            dropdown_selectPetsForCancelAnim:Set({})
+            parag_cancelAnim:Set({
+                Title = "Pickup/Place:",
+                Content = "None"
+            })
+        end,
+    })
+    local animation_cancelDelay = Automation:CreateInput({
+        Name = "Animation Cancel delay",
+        CurrentValue = "",
+        PlaceholderText = "seconds",
+        RemoveTextAfterFocusLost = false,
+        Flag = "animationCancelDelay",
+        Callback = function(Text)
+        -- The function that takes place when the input is changed
+        -- The variable (Text) is a string for the value in the text box
+        end,
+    })
+
+    local cancelAnimationEnabled
+    local cancelAnimationThread = nil
+    local cooldownListenerCancelAnim = nil
+    local petCooldownsCancelAnim = {}
+    Automation:CreateToggle({
+        Name = "Cancel Animation",
+        CurrentValue = false,
+        Flag = "cancelAnimation",
+        Callback = function(Value)
+            cancelAnimationEnabled = Value
+
+            if cancelAnimationEnabled then
+                if cancelAnimationThread then return end
+                -- Hook PetCooldownsUpdated
+                cooldownListenerCancelAnim = game:GetService("ReplicatedStorage").GameEvents.PetCooldownsUpdated.OnClientEvent:Connect(function(petId, data)
+                    if typeof(data) == "table" and data[1] and data[1].Time then
+                        petCooldownsCancelAnim[petId] = data[1].Time
+                    else
+                        petCooldownsCancelAnim[petId] = 0
+                    end
+                end)
+
+                -- Validate setup
+                local pickupList, animDelay, t = {}, tonumber(animation_cancelDelay.CurrentValue), 0
+                while t < 3 do
+                    pickupList = dropdown_selectPetsForCancelAnim.CurrentOption or {}
+                    animDelay = tonumber(animation_cancelDelay.CurrentValue)
+                    if #pickupList > 0 then
+                        if not animDelay then
+                            beastHubNotify("Invalid delay/cd input", "", 3)
+                            return
+                        end
+                        break
+                    end
+                    task.wait(0.5)
+                    t = t + 0.5
+                end
+                if #pickupList == 0 then
+                    beastHubNotify("Missing setup, please select pets", "", 3)
+                    return
+                end
+
+                -- Equip function
+                local function equipPetByUuid(uuid)
+                    local player = game.Players.LocalPlayer
+                    local backpack = player:WaitForChild("Backpack")
+                    for _, tool in ipairs(backpack:GetChildren()) do
+                        if tool:GetAttribute("PET_UUID") == uuid then
+                            player.Character.Humanoid:EquipTool(tool)
+                        end
+                    end
+                end
+
+                local function isEquipped(uuid)
+                    local function getPlayerData()
+                        local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                        local logs = dataService:GetData()
+                        return logs
+                    end
+                    
+                    local function equippedPets()
+                        local playerData = getPlayerData()
+                        if not playerData.PetsData then
+                            warn("PetsData missing")
+                            return nil
+                        end
+
+                        local tempStorage = playerData.PetsData.EquippedPets
+                        if not tempStorage or type(tempStorage) ~= "table" then
+                            warn("EquippedPets missing or invalid")
+                            return nil
+                        end
+
+                        local petIdsList = {}
+                        for _, id in ipairs(tempStorage) do
+                            table.insert(petIdsList, id)
+                        end
+
+                        return petIdsList
+                    end
+
+                    local equippedPets = equippedPets()
+                    if equippedPets then
+                        for _,id in ipairs(equippedPets) do
+                            if id == uuid then
+                                return true
+                            end
+                        end
+                    end
+
+                    return false
+                end
+                
+                local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
+
+                -- Main auto pickup thread
+                cancelAnimationThread = task.spawn(function()
+                    while cancelAnimationEnabled do
+                        if M.isSafeToPickPlace then
+                            pickupList = dropdown_selectPetsForCancelAnim.CurrentOption or {}
+                            for _, pickupEntry in ipairs(pickupList) do
+                                if not cancelAnimationEnabled then
+                                    break
+                                end
+                                local curMonitorPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
+                                local timeLeft = petCooldownsCancelAnim[curMonitorPetId] or 0
+                                if timeLeft == 0 and M.isSafeToPickPlace then
+                                    if not cancelAnimationEnabled then break end
+                                    local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
+                                    local isCurPicked = false
+
+                                    if M.isSafeToPickPlace and isEquipped(curPickupPetId) then
+                                        -- Unequip pet
+                                        task.wait(animDelay)
+                                        -- beastHubNotify("Cancel Anim!","Delay: "..tostring(animDelay) or "",.5)
+                                        isCurPicked = true
+                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curPickupPetId)
+                                        task.wait()
+                                        -- Equip to hand
+                                        equipPetByUuid(curPickupPetId)
+                                        task.wait()
+                                        -- Equip to farm
+                                        game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curPickupPetId, location)
+                                        task.wait()
+                                    end
+                                end
+                            end
+                        end
+                        task.wait(0.01)
+                    end
+
+                    cancelAnimationThread = nil
+                end)
+            else
+                -- Disable
+                if cooldownListenerCancelAnim then
+                    cooldownListenerCancelAnim:Disconnect()
+                    cooldownListenerCancelAnim = nil
+                end
+                cancelAnimationEnabled = false
+                cancelAnimationThread = nil
+            end
+        end
+    })
+    Automation:CreateDivider()
+
+
+
+
     --Auto pick & place
-    Automation:CreateSection("Auto Pick & Place")
+    Automation:CreateSection("Auto Pick then place Middle (Force Domino)")
     local parag_petsToPickup = Automation:CreateParagraph({
         Title = "Pickup:",
         Content = "None"
@@ -96,7 +349,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             })
         end,
     })
-
+    
     --when ready
     Automation:CreateDivider()
     local parag_petsToMonitor = Automation:CreateParagraph({
@@ -216,6 +469,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     -- Auto PickUp toggle variables
     local autoPickupEnabled = false
     local autoPickupThread = nil
+    local cancelAnimationThread = nil
     local cooldownListener = nil
     local petCooldowns = {}
     
@@ -253,7 +507,8 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                         break
                     end
                     task.wait(0.5)
-                    t += 0.5
+                    t = t + 0.5
+
                 end
                 if #pickupList == 0 or #monitorList == 0 then
                     beastHubNotify("Missing setup, please select pets to pick and place", "", 3)
@@ -300,20 +555,22 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     end
 
                     local equippedPets = equippedPets()
-                    for _,id in ipairs(equippedPets) do
-                        if id == uuid then
-                            return true
+                    if equippedPets then
+                        for _,id in ipairs(equippedPets) do
+                            if id == uuid then
+                                return true
+                            end
                         end
                     end
-
                     return false
                 end
+                
+                local animationCancelDelay = animation_cancelDelay.CurrentValue or 0
+                local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
 
                 -- Main auto pickup thread
                 autoPickupThread = task.spawn(function()
                     local justCasted = false
-                    local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
-
                     while autoPickupEnabled do
                         if M.isSafeToPickPlace then
                             for _, monitorEntry in ipairs(monitorList) do
@@ -325,8 +582,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                                 local curMonitorPetId = (monitorEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
                                 local timeLeft = petCooldowns[curMonitorPetId] or 0
-
+                                -- beastHubNotify("timeLeft: "..timeLeft, "",1)
                                 if (timeLeft == whenPetCdIs or timeLeft == (whenPetCdIs-1) or timeLeft == 0) and not justCasted and M.isSafeToPickPlace then
+                                    -- beastHubNotify("timeLeft TRUE: "..timeLeft, "",1)
                                     for _, pickupEntry in ipairs(pickupList) do
                                         if not autoPickupEnabled then break end
                                         local curPickupPetId = (pickupEntry:match("^[^|]+|%s*(.+)$") or ""):match("^%s*(.-)%s*$")
@@ -334,7 +592,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                                         if M.isSafeToPickPlace and isEquipped(curPickupPetId) then
                                             -- Unequip pet
-                                            beastHubNotify("Picking up!","",1)
+                                            -- beastHubNotify("Picking up!","",1)
                                             isCurPicked = true
                                             game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curPickupPetId)
                                             task.wait()
@@ -346,24 +604,24 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                             task.wait()
                                         end
                                         
-                                        task.wait(.5)
+                                        -- task.wait(.5)
+                                        -- task.wait(delayForNextPickup+0.5)
+                                        -- if M.isSafeToPickPlace and isCurPicked then
+                                        --     --for the monitoring pet
+                                        --     game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curMonitorPetId)
+                                        --     task.wait()
+                                        --     equipPetByUuid(curMonitorPetId)
+                                        --     task.wait()
+                                        --     game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curMonitorPetId, location)
+                                        --     task.wait()
+                                        -- end
 
-                                        if M.isSafeToPickPlace and isCurPicked then
-                                            --for the monitoring pet
-                                            game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", curMonitorPetId)
-                                            task.wait()
-                                            equipPetByUuid(curMonitorPetId)
-                                            task.wait()
-                                            game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", curMonitorPetId, location)
-                                            task.wait()
-                                        end
-
-                                        task.wait(delayForNextPickup)
+                                        -- task.wait(delayForNextPickup)
                                         justCasted = true
 
                                     end
                                 end
-                                task.wait()
+                                task.wait(.25)
                             end
                         end
                         
@@ -384,7 +642,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         end
     })
     Automation:CreateDivider()
-    
 
 
 
@@ -813,8 +1070,8 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 for line in string.gmatch(content, "([^\n]+)") do
                     local id = string.match(line, "({[%w%-]+})") -- keep the {} with the ID
                     if id then
-                        print("id loaded")
-                        print(id or "")
+                        -- print("id loaded")
+                        -- print(id or "")
                         table.insert(ids, id)
                     end
                 end
