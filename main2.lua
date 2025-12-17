@@ -253,19 +253,13 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, reloadScript, bea
         Flag = "autoRejoinNew", 
         Callback = function(Value)
             task.wait()
-            print("Value: ")
-            print(tostring(Value))
             autoRejoinEnabled = Value
-            print("autoRejoinEnabled: ")
-            print("autoRejoinEnabled: ")
             task.wait()
             if autoRejoinEnabled == true then
-                print("inside if")
                 local delaySec = tonumber(input_rejoinDelay.CurrentValue)
                 if delaySec and delaySec > 0 then
                     myFunctions.delayedRejoin(delaySec)
                 end
-                
             end    
         end,
     })
