@@ -1,4 +1,3 @@
-
 local M = {}
 
 
@@ -144,31 +143,126 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     Event:CreateDivider()
 
     -- --Event Shop
-    -- Event:CreateSection("Event Shop")
-    -- Event:CreateButton({
-    --     Name = "Test3",
-    --     Callback = function()
-    --         local function getEventItems()
-    --             local ReplicatedStorage = game:GetService("ReplicatedStorage") 
-    --             local dataTbl = require(ReplicatedStorage.Data.EventShopData)
-    --             local listItems = {}
+    Event:CreateSection("Dynamic Event Shop (triggers buy every minute)")
+    local parag_eventName = Event:CreateParagraph({Title = "Event Name:", Content = "None"})
+    local curEventName
+    local function getEventItems()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local dataTbl = require(ReplicatedStorage.Data.EventShopData)
+        local listItems = {}
 
-    --             for _, eventType in pairs(dataTbl) do
-    --                 for _,item in ipairs(eventType) do
-    --                     local itemToType = tostring(item) or "" .." | ".. tostring(item.ItemType) or ""
-    --                     table.insert(listItems, itemToType)
-    --                     print(tostring(itemToType))
-    --                 end
+        for eventName,eventItems in pairs(dataTbl) do
+            curEventName = eventName
+            for itemName,itemData in pairs(eventItems) do
+                local itemType = tostring(itemData.ItemType or "")
+                local itemToType = itemName.." | "..itemType
+                table.insert(listItems, itemToType)
+                print(itemToType)
+            end
+        end
 
-                    
-    --             end
-    --             return listItems
-    --         end
+        return listItems
+    end
+    local allShopItems = getEventItems()
+    task.wait()
+    if #allShopItems > 0 then
+        -- print("allShopItems have contents")
+    else
+        -- print("allShopItems nil")
+    end
 
-    --         local allShopItems = getEventItems()
-    --     end,
-    -- })
+    local autoBuyEventLookup = {}
+    local dropdown_eventShopItems = Event:CreateDropdown({
+        Name = "Select Items",
+        Options = allShopItems,
+        CurrentOption = {},
+        MultipleOptions = true,
+        Flag = "autoBuyEventShopItems", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+        Callback = function(Options)
+            parag_eventName:Set({Title = "Event Name:", Content = curEventName})
+            if #Options > 0 then
+                autoBuyEventLookup = {}
+                for _, option in ipairs(Options) do
+                    local curItemName = option:match("^(.-)%s*|")
+                    if curItemName then
+                        autoBuyEventLookup[curItemName] = true
+                    end
+                end
+            end
+        end,
+    })
 
+    Event:CreateButton({
+        Name = "Clear",
+        Callback = function()
+            dropdown_eventShopItems:Set({})
+            -- dropdown_eventShopItems:Refresh(allShopItems)
+        end,
+    })
+
+    local autoBuyEventShopEnabled = false
+    local autoBuyEventShopThread = nil
+    local toggle_autoBuyEventShop = Event:CreateToggle({
+        Name = "Auto Buy event Shop",
+        CurrentValue = false,
+        Flag = "autoBuyEventShop",
+        Callback = function(Value)
+            autoBuyEventShopEnabled = Value
+            if autoBuyEventShopEnabled then
+                if autoBuyEventShopThread then
+                    return
+                end
+                -- beastHubNotify("Auto event shop check running","",3)
+                autoBuyEventShopThread = task.spawn(function()
+                    local function getPlayerData()
+                        local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                        return dataService:GetData()
+                    end
+                    while autoBuyEventShopEnabled do
+                        local listToBuy = dropdown_eventShopItems and dropdown_eventShopItems.CurrentOption or {}
+                        if #listToBuy == 0 then
+                            task.wait(60)
+                            continue
+                        end
+                        local playerData = getPlayerData()
+                        local eventStock = playerData and playerData.EventShopStock
+                        if eventStock then
+                            for eventName, eventData in pairs(eventStock) do
+                                if eventName == curEventName then
+                                    local stocks = eventData.Stocks
+                                    if stocks then
+                                        for itemName, stockData in pairs(stocks) do
+                                            local curStock = stockData.Stock
+                                            if curStock and curStock > 0 then
+                                                if autoBuyEventLookup[itemName] == true then
+                                                    for i = 1, curStock do
+                                                        local args = {
+                                                            [1] = itemName,
+                                                            [2] = curEventName
+                                                        }
+                                                        game:GetService("ReplicatedStorage").GameEvents.BuyEventShopStock:FireServer(unpack(args))
+                                                        task.wait(0.15)
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        task.wait(60)
+                    end
+                    autoBuyEventShopThread = nil
+                end)
+            else
+                autoBuyEventShopEnabled = false
+                autoBuyEventShopThread = nil
+            end
+        end,
+    })
+
+
+    Event:CreateDivider()
 end
 
 return M
