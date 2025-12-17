@@ -245,13 +245,22 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, reloadScript, bea
         end,
     })
 
-
+    local autoRejoinEnabled = false
+    task.wait()
     local Toggle_autoRejoin = Main:CreateToggle({
         Name = "Enable Auto Rejoin",
         CurrentValue = false,
-        Flag = "autoRejoin", 
+        Flag = "autoRejoinNew", 
         Callback = function(Value)
-            if Value == true then
+            task.wait()
+            print("Value: ")
+            print(tostring(Value))
+            autoRejoinEnabled = Value
+            print("autoRejoinEnabled: ")
+            print("autoRejoinEnabled: ")
+            task.wait()
+            if autoRejoinEnabled == true then
+                print("inside if")
                 local delaySec = tonumber(input_rejoinDelay.CurrentValue)
                 if delaySec and delaySec > 0 then
                     myFunctions.delayedRejoin(delaySec)
