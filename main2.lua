@@ -223,7 +223,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, reloadScript, bea
     -- ===Auto rejoin / delayed rejoin
     local Slider_rejoinDelay = Main:CreateSlider({
         Name = "Auto Rejoin Delay",
-        Range = {5, 100},
+        Range = {5, 600},
         Increment = 1,
         Suffix = "seconds",
         CurrentValue = 30,
