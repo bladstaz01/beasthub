@@ -221,25 +221,42 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, reloadScript, bea
 
 
     -- ===Auto rejoin / delayed rejoin
-    local Slider_rejoinDelay = Main:CreateSlider({
+    -- local Slider_rejoinDelay = Main:CreateSlider({
+    --     Name = "Auto Rejoin Delay",
+    --     Range = {5, 600},
+    --     Increment = 1,
+    --     Suffix = "seconds",
+    --     CurrentValue = 30,
+    --     Flag = "rejoinDelay",
+    --     Callback = function(Value)
+    --         --print("rejoin delay: "..Value)        
+    --     end,
+    -- })
+
+    local input_rejoinDelay = Main:CreateInput({
         Name = "Auto Rejoin Delay",
-        Range = {5, 600},
-        Increment = 1,
-        Suffix = "seconds",
-        CurrentValue = 30,
+        CurrentValue = "",
+        PlaceholderText = "seconds",
+        RemoveTextAfterFocusLost = false,
         Flag = "rejoinDelay",
-        Callback = function(Value)
-            --print("rejoin delay: "..Value)        
+        Callback = function(Text)
+        -- The function that takes place when the input is changed
+        -- The variable (Text) is a string for the value in the text box
         end,
     })
+
+
     local Toggle_autoRejoin = Main:CreateToggle({
         Name = "Enable Auto Rejoin",
         CurrentValue = false,
         Flag = "autoRejoin", 
         Callback = function(Value)
             if Value == true then
-                local delaySec = Slider_rejoinDelay.CurrentValue
-                myFunctions.delayedRejoin(delaySec)
+                local delaySec = tonumber(input_rejoinDelay.CurrentValue)
+                if delaySec and delaySec > 0 then
+                    myFunctions.delayedRejoin(delaySec)
+                end
+                
             end    
         end,
     })
