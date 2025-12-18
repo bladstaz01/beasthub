@@ -157,7 +157,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 local itemType = tostring(itemData.ItemType or "")
                 local itemToType = itemName.." | "..itemType
                 table.insert(listItems, itemToType)
-                print(itemToType)
+                -- print(itemToType)
             end
         end
 
