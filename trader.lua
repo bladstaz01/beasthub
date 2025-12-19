@@ -21,7 +21,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 names = "None"
             end
             Paragraph_selectedPetsForCreateListing:Set({
-                Title = "Pets",
+                Title = "Pets:",
                 Content = names
             })    
         end,
