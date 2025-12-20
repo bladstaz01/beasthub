@@ -260,7 +260,49 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             end
         end,
     })
+    Event:CreateDivider()
 
+    Event:CreateSection("Auto Submit Christmas Event")
+    local eventDelayToSubmit = 5
+    Event:CreateInput({
+        Name = "Delay to submit",
+        CurrentValue = "5",
+        PlaceholderText = "seconds",
+        RemoveTextAfterFocusLost = false,
+        Flag = "eventDelayToSubmit",
+        Callback = function(Text)
+            eventDelayToSubmit = tonumber(Text)
+            if not eventDelayToSubmit then
+                eventDelayToSubmit = 5
+            end
+        end,
+    })
+    local autoSubmitAllEventEnabled = false
+    local autoSubmitAllEventThread = nil
+    Event:CreateToggle({
+        Name = "Auto Submit all",
+        CurrentValue = false,
+        Flag = "eventAutoSubmitAll",
+        Callback = function(Value)
+            autoSubmitAllEventEnabled = Value
+            if autoSubmitAllEventEnabled then
+                if autoSubmitAllEventThread then
+                    return
+                end
+                beastHubNotify("Auto submit all for event running","",3)
+                autoSubmitAllEventThread = task.spawn(function()
+                    while autoSubmitAllEventEnabled do
+                        game:GetService("ReplicatedStorage").GameEvents.ChristmasEvent.ChristmasTree_SubmitAll:FireServer()
+                        task.wait(eventDelayToSubmit)
+                    end
+                    autoSubmitAllEventThread = nil
+                end)
+            else
+                autoSubmitAllEventEnabled = false
+                autoSubmitAllEventThread = nil
+            end
+        end,
+    })
 
     Event:CreateDivider()
 end
