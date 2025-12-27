@@ -4,6 +4,23 @@ local M = {}
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook)
     local Event = Window:CreateTab("Event", "gift")
 
+    Event:CreateSection("Advance New Year event")
+    Event:CreateButton({
+        Name = "Show New Year event",
+        Callback = function()
+            --remove old platforms locally
+            workspace.Interaction.AdventPlatformOld.Parent = nil
+            workspace.Interaction.LumberjackPlatformOld.Parent = nil
+            --move new event module to workspace locally
+            local rs = game:GetService("ReplicatedStorage")
+            local newEvent = rs.Modules.UpdateService:FindFirstChild("New Year's Event")
+            if newEvent then
+                newEvent.Parent = workspace
+            end
+        end,
+    })
+    Event:CreateDivider()
+
     Event:CreateSection("Christmas Event - Auto Player Gift")
     local receiver_name = Event:CreateInput({
         Name = "Receiver Username",
