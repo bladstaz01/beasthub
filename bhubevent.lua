@@ -262,9 +262,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                                         task.wait(0.15)
                                                         --for allow buy
                                                         if #allowShopBuy > 0 then
-                                                            print("in allow buy")
-                                                            print(itemName)
-                                                            print(allowBuy)
                                                             for _, allowBuy in ipairs(allowShopBuy) do
                                                                 local args = {
                                                                     [1] = itemName,
@@ -273,8 +270,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                                                 game:GetService("ReplicatedStorage").GameEvents.BuyEventShopStock:FireServer(unpack(args))
                                                                 task.wait(0.15)
                                                             end
-                                                        else
-                                                            print("allowShopBuy false")
                                                         end
                                                     end
                                                 end
