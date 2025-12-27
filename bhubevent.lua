@@ -161,7 +161,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
     -- --Event Shop
     Event:CreateSection("Dynamic Event Shop (triggers buy every minute)")
-    local parag_eventName = Event:CreateParagraph({Title = "Event Name:", Content = "None"})
+    -- local parag_eventName = Event:CreateParagraph({Title = "Event Name:", Content = "None"})
     local curEventName
     local function getEventItems()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -196,7 +196,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         MultipleOptions = true,
         Flag = "autoBuyEventShopItems", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
         Callback = function(Options)
-            parag_eventName:Set({Title = "Event Name:", Content = curEventName})
+            -- parag_eventName:Set({Title = "Event Name:", Content = curEventName})
             if #Options > 0 then
                 autoBuyEventLookup = {}
                 for _, option in ipairs(Options) do
