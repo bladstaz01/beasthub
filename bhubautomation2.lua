@@ -201,6 +201,21 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                     return false
                 end
+
+                local function isPetInWorkspace(petId)
+                    local petsFolder = workspace:FindFirstChild("PetsPhysical")
+                    if not petsFolder then return false end
+
+                    for _, pet in ipairs(petsFolder:GetChildren()) do
+                        if pet:GetAttribute("UUID") == petId then
+                            return true
+                        end
+                    end
+
+                    return false
+                end
+
+
                 
                 beastHubNotify("Cancel animation running", "", 3)
                 local location = CFrame.new(getFarmSpawnCFrame():PointToWorldSpace(Vector3.new(8,0,-50)))
@@ -220,12 +235,14 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                         activeCancelTasks[petId] = true
                                         task.spawn(function()
                                             task.wait(animDelay)
-                                            if cancelAnimationEnabled and M.isSafeToPickPlace then
+                                            if cancelAnimationEnabled and M.isSafeToPickPlace and isPetInWorkspace(petId) then
                                                 game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", petId)
-                                                task.wait()
+                                                task.wait(0.05)
                                                 equipPetByUuid(petId)
-                                                task.wait()
+                                                task.wait(0.05)
                                                 game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", petId, location)
+                                            else
+                                                -- print("not in workspace: "..petId)
                                             end
                                             activeCancelTasks[petId] = nil
                                         end)
