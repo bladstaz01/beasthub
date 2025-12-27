@@ -217,6 +217,8 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         end,
     })
 
+    local allowShopBuy = {"New Years Shop"} --for multiple 
+
     local autoBuyEventShopEnabled = false
     local autoBuyEventShopThread = nil
     local toggle_autoBuyEventShop = Event:CreateToggle({
@@ -259,6 +261,17 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                                         }
                                                         game:GetService("ReplicatedStorage").GameEvents.BuyEventShopStock:FireServer(unpack(args))
                                                         task.wait(0.15)
+                                                        --for allow buy
+                                                        if #allowShopBuy > 0 then
+                                                            for _, allowBuy in ipairs(allowShopBuy) do
+                                                                local args = {
+                                                                    [1] = itemName,
+                                                                    [2] = allowBuy
+                                                                }
+                                                                game:GetService("ReplicatedStorage").GameEvents.BuyEventShopStock:FireServer(unpack(args))
+                                                                task.wait(0.15)
+                                                            end
+                                                        end
                                                     end
                                                 end
                                             end
