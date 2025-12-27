@@ -218,7 +218,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     })
 
     local allowShopBuy = {"New Years Shop"} --for multiple 
-
     local autoBuyEventShopEnabled = false
     local autoBuyEventShopThread = nil
     local toggle_autoBuyEventShop = Event:CreateToggle({
@@ -247,7 +246,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                         local eventStock = playerData and playerData.EventShopStock
                         if eventStock then
                             for eventName, eventData in pairs(eventStock) do
-                                if eventName == curEventName then
+                                if eventName == curEventName or #allowShopBuy > 0 then
                                     local stocks = eventData.Stocks
                                     if stocks then
                                         for itemName, stockData in pairs(stocks) do
@@ -263,6 +262,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                                         task.wait(0.15)
                                                         --for allow buy
                                                         if #allowShopBuy > 0 then
+                                                            print("in allow buy")
+                                                            print(itemName)
+                                                            print(allowBuy)
                                                             for _, allowBuy in ipairs(allowShopBuy) do
                                                                 local args = {
                                                                     [1] = itemName,
@@ -271,6 +273,8 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                                                 game:GetService("ReplicatedStorage").GameEvents.BuyEventShopStock:FireServer(unpack(args))
                                                                 task.wait(0.15)
                                                             end
+                                                        else
+                                                            print("allowShopBuy false")
                                                         end
                                                     end
                                                 end
