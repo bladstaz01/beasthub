@@ -2037,6 +2037,31 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
     --Auto Pet Age Break
     local idsOnly --storage for ids for target pet breaker dropdown
+    local targetPetAgeBreakerLevel = 125
+    local selectedTargetCurrentAge = 0
+
+    Pets:CreateSection("Auto Pet Age Break")
+    Pets:CreateParagraph({
+        Title = "INSTRUCTIONS:",
+        Content = "1.) Select Pet\n2.) Refresh list if pet not found\n3.) Ignore Target ID, it will auto populate"
+    })
+    local selectedPetForAgeBreaker = ""
+    -- local paragraph_currentId = Pets:CreateParagraph({
+    --     Title = "CURRENT ID:",
+    --     Content = "None"
+    -- })
+
+    Pets:CreateInput({
+        Name = "Target Pet level:",
+        CurrentValue = "125",
+        PlaceholderText = "max is 125",
+        RemoveTextAfterFocusLost = false,
+        Flag = "petAgeLevelTarget",
+        Callback = function(Text)
+            targetPetAgeBreakerLevel = tonumber(Text) or 125
+        end,
+    })
+
     local allPetsInInventory = function()
         idsOnly = {}
         local function getPlayerData()
@@ -2109,9 +2134,10 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                         nameToId = pet.PetType.." | "..(curMutation or "Normal").." | Base KG: "..(string.format("%.2f", pet.PetData.BaseWeight * 1.1)).." | Age: "..tostring(pet.PetData.Level),
                         Uid = uid
                     }
-                    if not pet.PetData.IsFavorite and pet.PetData.Level >= 100 then --filter only allowed age for breaker
+                    if not pet.PetData.IsFavorite and pet.PetData.Level >= 100 and pet.PetData.Level < targetPetAgeBreakerLevel then --filter only allowed age for breaker
                         table.insert(unfavoritePets, entry)
                     end
+                    
                 end
             end
             --
@@ -2138,17 +2164,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
     end
 
-    Pets:CreateSection("Auto Pet Age Break")
-    Pets:CreateParagraph({
-        Title = "INSTRUCTIONS:",
-        Content = "1.) Select Pet\n2.) Refresh list if pet not found\n3.) Ignore Target ID, it will auto populate"
-    })
-    local selectedPetForAgeBreaker = ""
-    -- local paragraph_currentId = Pets:CreateParagraph({
-    --     Title = "CURRENT ID:",
-    --     Content = "None"
-    -- })
-
     local petBreakerTargetIDstored = Pets:CreateDropdown({
         Name = "Target ID (do not change)",
         Options = {""},
@@ -2171,11 +2186,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         Flag = "AutPetAgeBreakTarget", 
         Callback = function(Options)
             local chosen = Options[1]
-            -- print("=======chosen:")
-            -- print(chosen)
             for i, v in ipairs(selectTargetPetForBreaker) do
-                -- print("looping")
-                -- print(v)
                 if v == chosen then
                     selectedIndex = i
                     break
@@ -2183,48 +2194,35 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             end
             selectedPetForAgeBreaker = idsOnly[selectedIndex]
             if selectedPetForAgeBreaker then
-                -- print("storing value")
-                -- print(selectedPetForAgeBreaker)
                 petBreakerTargetIDstored:Refresh({ selectedPetForAgeBreaker }) 
                 task.wait()
                 petBreakerTargetIDstored:Set({ selectedPetForAgeBreaker })
                 -- print("stored selectedPetForAgeBreaker to stored input")
+                selectedTargetCurrentAge = tonumber(chosen:match("Age:%s*(%d+)"))
             end
             if not selectedPetForAgeBreaker then
                 -- print("getting value from stored dropdown")
                 selectedPetForAgeBreaker = petBreakerTargetIDstored.CurrentOption[1] --stored value in rayfield
+                selectedTargetCurrentAge = tonumber(chosen:match("Age:%s*(%d+)"))
                 -- print("used pet id from stored input")
                 -- print(selectedPetForAgeBreaker)
             end
-
-            -- paragraph_currentId:Set({
-            --     Title = "CURRENT ID:",
-            --     Content = selectedPetForAgeBreaker
-            -- })  
         end,
     })
 
     Pets:CreateButton({
         Name = "Refresh List",
         Callback = function()
+            --refresh code
             local newList = allPetsInInventory()
-
-            -- update main arrays
             selectTargetPetForBreaker = newList  -- update names
-            -- idsOnly is already updated inside allPetsInInventory()
-
-            -- refresh dropdown
             selectedPetForAgeBreak:Refresh(newList)
-
-            -- optional: clear selection
             selectedPetForAgeBreak:Set({"None"})
-
             selectedIndex = nil
             selectedPetForAgeBreaker = nil
+            --refresh code end
         end,
     })
-
-
 
     local petAgeKGsacrifice = Pets:CreateDropdown({
         Name = "Sacrifice Below Base KG:",
@@ -2320,15 +2318,12 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 end
 
                 local function getPetIdByNameAndFilterKg(name, basekg, belowLevel, exceptId)
-                    -- print(name)
-                    -- print(basekg)
-                    -- print(belowLevel)
-                    -- print(exceptId)
+                    local finalBelowLevel = (below == 1) and 2 or belowLevel
                     local playerData = getPlayerData()
                     if playerData.PetsData and playerData.PetsData.PetInventory and playerData.PetsData.PetInventory.Data then
                         for id, data in pairs(playerData.PetsData.PetInventory.Data) do
                             local curBaseKG = tonumber(string.format("%.2f", data.PetData.BaseWeight * 1.1))
-                            if not data.PetData.IsFavorite and data.PetType == name and curBaseKG < basekg and id ~= exceptId and data.PetData.Level < belowLevel then
+                            if not data.PetData.IsFavorite and data.PetType == name and curBaseKG < basekg and id ~= exceptId and data.PetData.Level < finalBelowLevel then
                                 return id
                             end
                         end
@@ -2341,7 +2336,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
                 local petIdToSacrifice = getPetIdByNameAndFilterKg(sacrificePetNameParam, tonumber(petAgeKGsacrifice.CurrentOption[1]), tonumber(petAgeLevelSacrifice.CurrentValue), selectedIdParam)
             
-                if petIdToSacrifice and autoPetAgeBreakEnabled then
+                if petIdToSacrifice and autoPetAgeBreakEnabled and selectedTargetCurrentAge < targetPetAgeBreakerLevel then
                     beastHubNotify("Worthy sacrifice found!","",3)
                     task.wait(1)
                     --do the remotes here
@@ -2475,6 +2470,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 autoPetAgeBreakThread = task.spawn(function()
                     while autoPetAgeBreakEnabled do
                         autoBreaker(sacrificePetName, selectedId)
+                        selectedTargetCurrentAge = selectedTargetCurrentAge + 1
                     end
                     
                 end) --end thread
