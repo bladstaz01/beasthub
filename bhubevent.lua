@@ -368,7 +368,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
 
     --bring back
     Event:CreateButton({
-        Name = "Bring Back Christmas Event Plantforms",
+        Name = "Bring Back Christmas Event Platforms",
         Callback = function()
             local ReplicatedStorage = game:GetService("ReplicatedStorage")
             local adventPlatform = ReplicatedStorage.Modules.UpdateService:WaitForChild("AdventPlatformOld")
