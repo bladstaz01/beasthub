@@ -1423,7 +1423,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                     --monitor if curLevel dropped
                                     while autoNMenabled and curLevel >= targetLevel do
                                         beastHubNotify("Ready for Nightmare!", "Waiting for NM skill..",3)
-                                        task.wait(10)
+                                        task.wait(5)
                                         curLevel = getCurrentPetLevelByUid(uid)
                                     end
                                     task.wait(.5)
