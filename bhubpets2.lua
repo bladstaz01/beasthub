@@ -1876,7 +1876,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                 while autoEleEnabled and curLevel >= targetLevel do
                                     -- local delayInSecs = (delayInMins * 60) or nil
                                     beastHubNotify("Ready for Elephant!", "Waiting for Elephant skill..",2)
-                                    task.wait(15)
+                                    task.wait(5)
                                     
                                     --insert stacking code here = PATCHED!
                                     -- if toyToUse ~= "Do not use STACKING" and curLevel >= targetLevel then 
