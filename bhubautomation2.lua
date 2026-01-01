@@ -1,6 +1,11 @@
 local M = {}
 
 M.isSafeToPickPlace = true
+M.mimicsListFor9Pets = ""
+M.spiderFor9Pets = ""
+M.eagleFor9Pets = ""
+M.delayToStayInSpider = ""
+M.delayToStayInEagle = ""
 
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook, allSeedsData, allSeedsOnly, equipFruitById)
     local Automation = Window:CreateTab("Automation", "bot")
@@ -1955,6 +1960,150 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         end
     })
     Automation:CreateDivider()
+
+
+    --9 pets tech
+    Automation:CreateSection("9 Pets Hatching team")
+    local parag_petsCore = Automation:CreateParagraph({
+        Title = "Core:",
+        Content = "None"
+    })
+    local dropdown_selectPetsForCore = Automation:CreateDropdown({
+        Name = "Core Pet/s (7 Mimics)",
+        Options = {},
+        CurrentOption = {},
+        MultipleOptions = true,
+        Flag = "selectPetsForPetCore", 
+        Callback = function(Options)
+            M.mimicsListFor9Pets = Options
+            local listText = table.concat(Options, ", ")
+            if listText == "" then
+                listText = "None"
+            end
+            parag_petsCore:Set({
+                Title = "Mimics:",
+                Content = listText
+            })
+        end,
+    })
+    local dropdown_selectPetsForOffSupport = Automation:CreateDropdown({
+        Name = "Off-field support (1 Spider)",
+        Options = {},
+        CurrentOption = {},
+        MultipleOptions = false,
+        Flag = "selectPetsForOffSupport", 
+        Callback = function(Options)
+            M.spiderFor9Pets = Options[1]
+        end,
+    })
+    local dropdown_selectPetsForEggReducer = Automation:CreateDropdown({
+        Name = "Egg time reducer (1 Eagle)",
+        Options = {},
+        CurrentOption = {},
+        MultipleOptions = false,
+        Flag = "selectPetsForEggReducer", 
+        Callback = function(Options)
+            M.eagleFor9Pets = Options[1]
+        end,
+    })
+    local input_delayToStayInSpider = Automation:CreateInput({
+        Name = "Delay to stay in Spider",
+        CurrentValue = "30",
+        PlaceholderText = "seconds",
+        RemoveTextAfterFocusLost = false,
+        Flag = "delayToStayInSpider",
+        Callback = function(Text)
+            M.delayToStayInSpider = tonumber(Text) or 25
+        end,
+    })
+    local input_delayToStayInEagles = Automation:CreateInput({
+        Name = "Delay to stay in Eagle",
+        CurrentValue = "30",
+        PlaceholderText = "seconds",
+        RemoveTextAfterFocusLost = false,
+        Flag = "delayToStayInEagles",
+        Callback = function(Text)
+            M.delayToStayInEagle = tonumber(Text) or 15
+        end,
+    })
+
+
+    Automation:CreateButton({
+        Name = "Refresh list",
+        Callback = function()
+            local function getPlayerData()
+                local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                local logs = dataService:GetData()
+                return logs
+            end
+
+            local function equippedPets()
+                local playerData = getPlayerData()
+                if not playerData.PetsData then
+                    warn("PetsData missing")
+                    return nil
+                end
+
+                local tempStorage = playerData.PetsData.EquippedPets
+                if not tempStorage or type(tempStorage) ~= "table" then
+                    warn("EquippedPets missing or invalid")
+                    return nil
+                end
+
+                local petIdsList = {}
+                for _, id in ipairs(tempStorage) do
+                    table.insert(petIdsList, id)
+                end
+
+                return petIdsList
+            end
+
+            local function getPetNameUsingId(uid)
+                local playerData = getPlayerData()
+                if playerData.PetsData.PetInventory.Data then
+                    local data = playerData.PetsData.PetInventory.Data
+                    for id,petData in pairs(data) do
+                        if id == uid then
+                            return petData.PetType.." > "..petData.PetData.Name.." > "..string.format("%.2f", petData.PetData.BaseWeight * 1.1).."kg"
+                        end
+                    end
+                end
+            end
+
+            local equipped = equippedPets()
+            local namesToId = {}
+            for _,id in ipairs(equipped) do
+                local petName = getPetNameUsingId(id)
+                table.insert(namesToId, petName.." | "..id)
+            end
+
+            if equipped and #equipped > 0 then
+                dropdown_selectPetsForCore:Refresh(namesToId)
+                dropdown_selectPetsForOffSupport:Refresh(namesToId)
+                dropdown_selectPetsForEggReducer:Refresh(namesToId)
+            else
+                beastHubNotify("equipped pets error", "", 3)
+            end
+        end,
+    })
+    Automation:CreateButton({
+        Name = "Clear list",
+        Callback = function()
+            dropdown_selectPetsForCore:Set({})
+            dropdown_selectPetsForOffSupport:Set({})
+            dropdown_selectPetsForEggReducer:Set({})
+            parag_petsCore:Set({
+                Title = "Mimics:",
+                Content = "None"
+            })
+        end,
+    })
+    
+
+
+    Automation:CreateDivider()
+
+
 
     Automation:CreateSection("Static loadout switching (NOT FOR AUTO HATCHING)")
     local switcher1 = Automation:CreateDropdown({
