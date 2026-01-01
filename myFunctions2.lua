@@ -450,7 +450,7 @@ function M.loadCustomTeam(customName, getFarmSpawnCFrame, beastHubNotify)
         return petIdsList
     end
     local equipped = equippedPets()
-    if #equipped > 0 then
+    if equipped and #equipped > 0 then
         for _,id in ipairs(equipped) do
             local args = {
                 [1] = "UnequipPet";
@@ -478,9 +478,165 @@ function M.loadCustomTeam(customName, getFarmSpawnCFrame, beastHubNotify)
         game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer(unpack(args))
         task.wait()
     end
-
     -- beastHubNotify("Loaded "..customName, "", 3)
+end
 
+function M.loadCustomTeamDropdown(mimicsListFor9Pets, spiderFor9Pets, eagleFor9Pets, delayToStayInSpider, delayToStayInEagle, getFarmSpawnCFrame, beastHubNotify, techControl)    
+    if type(mimicsListFor9Pets) ~= "table" or #mimicsListFor9Pets == 0 then
+        beastHubNotify("Error: Mimics list is empty or invalid", "", 3)
+        return
+    end
+
+    if type(spiderFor9Pets) ~= "string" or spiderFor9Pets == "" then
+        beastHubNotify("Error: Spider pet not selected", "", 3)
+        return
+    end
+
+    if type(eagleFor9Pets) ~= "string" or eagleFor9Pets == "" then
+        beastHubNotify("Error: Eagle pet not selected", "", 3)
+        return
+    end
+
+    delayToStayInSpider = tonumber(delayToStayInSpider)
+    delayToStayInEagle = tonumber(delayToStayInEagle)
+
+    if not delayToStayInSpider or delayToStayInSpider <= 0 then
+        beastHubNotify("Error: Invalid spider delay, defaulting to 25s", "", 3)
+        delayToStayInSpider = 25
+    end
+
+    if not delayToStayInEagle or delayToStayInEagle <= 0 then
+        beastHubNotify("Error: Invalid eagle delay, defaulting to 15s", "", 3)
+        delayToStayInEagle = 15
+    end
+
+    local spiderFor9Petsid = string.match(spiderFor9Pets, "({[%w%-]+})")
+    local eagleFor9Petsid = string.match(eagleFor9Pets, "({[%w%-]+})")
+
+	local function getPetEquipLocation()
+		local ok, result = pcall(function()
+			local spawnCFrame = getFarmSpawnCFrame()
+			if typeof(spawnCFrame) ~= "CFrame" then
+				return nil
+			end
+			return spawnCFrame * CFrame.new(0, 0, -5)
+		end)
+		if ok then
+			return result
+		else
+			warn("EquipLocationError " .. tostring(result))
+			return nil
+		end
+	end
+	local function parseFromDropdown()
+        local ids = {}
+        if not mimicsListFor9Pets or type(mimicsListFor9Pets) ~= "table" then
+            -- print("parseFromDropdown: mimicsListFor9Pets is nil or not table")
+            return ids
+        end
+        -- print("parseFromDropdown: entries:")
+        for i, entry in ipairs(mimicsListFor9Pets) do
+            -- print(i, tostring(entry))
+            local id = string.match(entry, "({[%w%-]+})")
+            if id then
+                -- print("extracted id:", id)
+                table.insert(ids, id)
+            else
+                -- print("failed to extract id from entry")
+            end
+        end
+        -- print("final ids list size:", #ids)
+        return ids
+    end
+
+	local function getPlayerData()
+		local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+		return dataService:GetData()
+	end
+	local function equippedPets()
+		local playerData = getPlayerData()
+		if not playerData.PetsData then
+			return nil
+		end
+		local tempStorage = playerData.PetsData.EquippedPets
+		if not tempStorage or type(tempStorage) ~= "table" then
+			return nil
+		end
+		local petIdsList = {}
+		for _, id in ipairs(tempStorage) do
+			table.insert(petIdsList, id)
+		end
+		return petIdsList
+	end
+
+    local function waitWithStop(prefix, seconds)
+        local elapsed = 0
+        while elapsed < seconds do
+            if techControl.stop then
+                break
+            end
+            beastHubNotify(prefix..math.floor(seconds - elapsed).."s left", "", 1)
+            elapsed = elapsed + task.wait(1) -- wait 1 second per loop
+        end
+    end
+
+
+
+	local equipped = equippedPets()
+	if equipped and #equipped > 0 then
+		for _, id in ipairs(equipped) do
+			game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer("UnequipPet", id)
+			task.wait()
+		end
+	end
+	local location = getPetEquipLocation()
+	local petIds = parseFromDropdown()
+	if #petIds == 0 then
+		beastHubNotify("Missing setup! Check Automations tab -> 9 Pets tech", "", 3)
+		return
+	end
+	for _, id in ipairs(petIds) do
+		game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer("EquipPet", id, location)
+		task.wait()
+	end
+	task.spawn(function()
+        while not techControl.stop do
+            -- beastHubNotify("techControl: "..tostring(techControl.stop),"",3)
+            if spiderFor9Petsid and not techControl.stop then
+                -- beastHubNotify("Spider time delay: "..tostring(delayToStayInSpider), "", delayToStayInSpider)
+                game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer("EquipPet", spiderFor9Petsid, location)
+                waitWithStop("Spider delay: ", delayToStayInSpider)
+                game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer("UnequipPet", spiderFor9Petsid)
+            end
+            if techControl.stop then
+                break
+            end
+            if eagleFor9Petsid and not techControl.stop then
+                -- beastHubNotify("Eagle time delay: "..tostring(delayToStayInEagle), "", delayToStayInEagle)
+                game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer("EquipPet", eagleFor9Petsid, location)
+                waitWithStop("Eagle delay: ", delayToStayInEagle)
+                game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("PetsService", 9e9):FireServer("UnequipPet", eagleFor9Petsid)
+            end
+            if techControl.stop then
+                break
+            end
+        end
+    end)
+
+end
+
+
+function M.switchToLoadoutWithTech(mimicsListFor9Pets, spiderFor9Pets, eagleFor9Pets, delayToStayInSpider, delayToStayInEagle, getFarmSpawnCFrame, beastHubNotify, techControl)
+    local finalNum
+    local success, err = pcall(function()
+        M.loadCustomTeamDropdown(mimicsListFor9Pets, spiderFor9Pets, eagleFor9Pets, delayToStayInSpider, delayToStayInEagle, getFarmSpawnCFrame, beastHubNotify, techControl)
+    end)
+
+    if success then
+        --print("Switched to loadout: "..finalNum)
+    else
+        print("Error in switching to loadout")
+    end
 end
 
 function M.switchToLoadout(loadoutNum, getFarmSpawnCFrame, beastHubNotify)
