@@ -501,13 +501,13 @@ function M.loadCustomTeamDropdown(mimicsListFor9Pets, spiderFor9Pets, eagleFor9P
     delayToStayInEagle = tonumber(delayToStayInEagle)
 
     if not delayToStayInSpider or delayToStayInSpider <= 0 then
-        beastHubNotify("Error: Invalid spider delay, defaulting to 25s", "", 3)
-        delayToStayInSpider = 25
+        beastHubNotify("Error: Invalid spider delay, defaulting to 30s", "", 3)
+        delayToStayInSpider = 30
     end
 
     if not delayToStayInEagle or delayToStayInEagle <= 0 then
-        beastHubNotify("Error: Invalid eagle delay, defaulting to 15s", "", 3)
-        delayToStayInEagle = 15
+        beastHubNotify("Error: Invalid eagle delay, defaulting to 30s", "", 3)
+        delayToStayInEagle = 30
     end
 
     local spiderFor9Petsid = string.match(spiderFor9Pets, "({[%w%-]+})")
