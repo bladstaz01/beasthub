@@ -255,7 +255,8 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                 end
                             end
                         end
-                        task.wait(0.05)
+                        -- task.wait(0.05)
+                        task.wait(0.001)
                     end
                     cancelAnimationThread = nil
                 end)
