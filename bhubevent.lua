@@ -130,7 +130,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     while autoBuyEventShopEnabled do
                         local listToBuy = dropdown_eventShopItems and dropdown_eventShopItems.CurrentOption or {}
                         if #listToBuy == 0 then
-                            task.wait(60)
+                            task.wait()
                             continue
                         end
                         local playerData = getPlayerData()
@@ -170,7 +170,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                 end
                             end
                         end
-                        task.wait(60)
+                        task.wait(2)
                     end
                     autoBuyEventShopThread = nil
                 end)
