@@ -110,10 +110,11 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     local allowShopBuy = {"New Years Shop"} --for multiple 
     local autoBuyEventShopEnabled = false
     local autoBuyEventShopThread = nil
-    local toggle_autoBuyEventShop = Event:CreateToggle({
-        Name = "Auto Buy Event Shop",
-        CurrentValue = false,
-        Flag = "autoBuyEventShop",
+ 
+    local toggle_autoBuyEventShop = Event:CreateToggle({ --OLD
+        Name = "Auto Buy Event Shop (default ON)",
+        CurrentValue = true,
+        Flag = "autoBuyEventShopNew",
         Callback = function(Value)
             autoBuyEventShopEnabled = Value
             if autoBuyEventShopEnabled then
@@ -179,7 +180,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             end
         end,
     })
-
 
     Event:CreateDivider()
 
