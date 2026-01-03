@@ -130,9 +130,21 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     while autoBuyEventShopEnabled do
                         local listToBuy = dropdown_eventShopItems and dropdown_eventShopItems.CurrentOption or {}
                         if #listToBuy == 0 then
-                            task.wait()
-                            continue
+                            local waited = 0
+                            while waited < 3 do
+                                task.wait(0.5)
+                                waited += 0.5
+                                listToBuy = dropdown_eventShopItems and dropdown_eventShopItems.CurrentOption or {}
+                                if #listToBuy > 0 then
+                                    break
+                                end
+                            end
+                            if #listToBuy == 0 then
+                                -- print("list to buy empty after retry")
+                                continue
+                            end
                         end
+
                         local playerData = getPlayerData()
                         local eventStock = playerData and playerData.EventShopStock
                         if eventStock then
