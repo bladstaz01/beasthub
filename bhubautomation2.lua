@@ -4,8 +4,8 @@ M.isSafeToPickPlace = true
 M.mimicsListFor9Pets = ""
 M.spiderFor9Pets = ""
 M.eagleFor9Pets = ""
-M.delayToStayInSpider = ""
-M.delayToStayInEagle = ""
+M.delayToStayInSpider = 30
+M.delayToStayInEagle = 30
 
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook, allSeedsData, allSeedsOnly, equipFruitById)
     local Automation = Window:CreateTab("Automation", "bot")
