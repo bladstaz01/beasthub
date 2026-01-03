@@ -131,7 +131,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                         local listToBuy = dropdown_eventShopItems and dropdown_eventShopItems.CurrentOption or {}
                         if #listToBuy == 0 then
                             local waited = 0
-                            while waited < 3 do
+                            while waited < 5 do
                                 task.wait(0.5)
                                 waited += 0.5
                                 listToBuy = dropdown_eventShopItems and dropdown_eventShopItems.CurrentOption or {}
@@ -140,7 +140,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                 end
                             end
                             if #listToBuy == 0 then
-                                -- print("list to buy empty after retry")
+                                print("list to buy empty after retry")
                                 continue
                             end
                         end
