@@ -829,8 +829,24 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                     end 
 
                     while autoPetBoostEnabled do
-                        local petList = dropdown_selectPetsForPetBoost and dropdown_selectPetsForPetBoost.CurrentOption or {}
-                        local toyList = dropdown_selectedToys and dropdown_selectedToys.CurrentOption or {}
+                        -- local petList = dropdown_selectPetsForPetBoost and dropdown_selectPetsForPetBoost.CurrentOption or {}
+                        -- local toyList = dropdown_selectedToys and dropdown_selectedToys.CurrentOption or {}
+
+                        --retry logic
+                        local petList
+                        local toyList
+                        local waited = 0
+                        while waited < 5 do
+                            toyList = dropdown_selectedToys and dropdown_selectedToys.CurrentOption
+                            if typeof(toyList) == "table" then
+                                break
+                            end
+                            task.wait(0.5)
+                            waited += 0.5
+                        end
+                        petList = dropdown_selectPetsForPetBoost and dropdown_selectPetsForPetBoost.CurrentOption or {}
+                        toyList = typeof(toyList) == "table" and toyList or {}
+
 
                         if #petList == 0 or #toyList == 0 then
                             task.wait(1)
