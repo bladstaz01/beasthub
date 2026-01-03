@@ -571,11 +571,12 @@ function M.loadCustomTeamDropdown(mimicsListFor9Pets, spiderFor9Pets, eagleFor9P
 
     local function waitWithStop(prefix, seconds)
         local elapsed = 0
+        beastHubNotify(prefix..math.floor(seconds - elapsed).."s left", "", 1)
         while elapsed < seconds do
             if techControl.stop then
                 break
             end
-            beastHubNotify(prefix..math.floor(seconds - elapsed).."s left", "", 1)
+            -- beastHubNotify(prefix..math.floor(seconds - elapsed).."s left", "", 1)
             elapsed = elapsed + task.wait(1) -- wait 1 second per loop
         end
     end
