@@ -5,47 +5,77 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     local Event = Window:CreateTab("Event", "gift")
 
     Event:CreateSection("New Year Event")
-    local autoClaimNewYearLoginEnabled = false
-    local autoClaimNewYearLoginThread = nil
 
+    local autoSpinEnabled = false
+    local autoSpinThread = nil
     Event:CreateToggle({
-        Name = "Auto Claim Daily login",
+        Name = "Auto Spin",
         CurrentValue = false,
-        Flag = "event_autoClaimNewYearLogin",
+        Flag = "autoSpin",
         Callback = function(Value)
-            autoClaimNewYearLoginEnabled = Value
-
-            if autoClaimNewYearLoginEnabled then
-                if autoClaimNewYearLoginThread then return end
-
-                local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                local player = game.Players.LocalPlayer
-
-                autoClaimNewYearLoginThread = task.spawn(function()
-                    while autoClaimNewYearLoginEnabled do
-                        local playerData = require(ReplicatedStorage.Modules.DataService):GetData()
-                        local adventDays = playerData.NewYearsEvent and playerData.NewYearsEvent.Advent and playerData.NewYearsEvent.Advent.Days or {}
-
-                        for dayIndex, dayInfo in ipairs(adventDays) do
-                            if dayInfo.State == "Complete" then
-                                pcall(function()
-                                    ReplicatedStorage.GameEvents.NewYearsEvent.ClaimAdventCalendarDay:FireServer(dayIndex)
-                                end)
-                                break
-                            end
-                        end
-
-                        task.wait(60) -- lightweight delay before next check
+            autoSpinEnabled = Value
+            if autoSpinEnabled then
+                if autoSpinThread then
+                    return
+                end
+                autoSpinThread = task.spawn(function()
+                    local rs = game:GetService("ReplicatedStorage")
+                    local spinEvent = rs:WaitForChild("GameEvents", 5):WaitForChild("GardenGame", 5):WaitForChild("Spin", 5)
+                    while autoSpinEnabled do
+                        spinEvent:FireServer()
+                        task.wait(2)
                     end
-
-                    autoClaimNewYearLoginThread = nil
+                    autoSpinThread = nil
                 end)
             else
-                autoClaimNewYearLoginEnabled = false
-                autoClaimNewYearLoginThread = nil
+                autoSpinEnabled = false
+                autoSpinThread = nil
             end
         end,
     })
+
+
+    -- local autoClaimNewYearLoginEnabled = false
+    -- local autoClaimNewYearLoginThread = nil
+
+    -- Event:CreateToggle({
+    --     Name = "Auto Claim Daily login",
+    --     CurrentValue = false,
+    --     Flag = "event_autoClaimNewYearLogin",
+    --     Callback = function(Value)
+    --         autoClaimNewYearLoginEnabled = Value
+
+    --         if autoClaimNewYearLoginEnabled then
+    --             if autoClaimNewYearLoginThread then return end
+
+    --             local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    --             local player = game.Players.LocalPlayer
+
+    --             autoClaimNewYearLoginThread = task.spawn(function()
+    --                 while autoClaimNewYearLoginEnabled do
+    --                     local playerData = require(ReplicatedStorage.Modules.DataService):GetData()
+    --                     local adventDays = playerData.NewYearsEvent and playerData.NewYearsEvent.Advent and playerData.NewYearsEvent.Advent.Days or {}
+
+    --                     for dayIndex, dayInfo in ipairs(adventDays) do
+    --                         if dayInfo.State == "Complete" then
+    --                             pcall(function()
+    --                                 ReplicatedStorage.GameEvents.NewYearsEvent.ClaimAdventCalendarDay:FireServer(dayIndex)
+    --                             end)
+    --                             break
+    --                         end
+    --                     end
+
+    --                     task.wait(60) -- lightweight delay before next check
+    --                 end
+
+    --                 autoClaimNewYearLoginThread = nil
+    --             end)
+    --         else
+    --             autoClaimNewYearLoginEnabled = false
+    --             autoClaimNewYearLoginThread = nil
+    --         end
+    --     end,
+    -- })
 
     Event:CreateDivider()
 
