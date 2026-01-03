@@ -110,10 +110,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     local allowShopBuy = {"New Years Shop"} --for multiple 
     local autoBuyEventShopEnabled = false
     local autoBuyEventShopThread = nil
- 
     local toggle_autoBuyEventShop = Event:CreateToggle({ --OLD
         Name = "Auto Buy Event Shop (default ON)",
-        CurrentValue = true,
+        CurrentValue = false,
         Flag = "autoBuyEventShopNew",
         Callback = function(Value)
             autoBuyEventShopEnabled = Value
@@ -131,7 +130,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                         local listToBuy = dropdown_eventShopItems and dropdown_eventShopItems.CurrentOption or {}
                         if #listToBuy == 0 then
                             local waited = 0
-                            while waited < 5 do
+                            while waited < 10 do
                                 task.wait(0.5)
                                 waited += 0.5
                                 listToBuy = dropdown_eventShopItems and dropdown_eventShopItems.CurrentOption or {}
@@ -140,8 +139,10 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                 end
                             end
                             if #listToBuy == 0 then
-                                print("list to buy empty after retry")
+                                -- print("list to buy empty after retry")
                                 continue
+                            else
+                                -- print("list to buy has value")
                             end
                         end
 
@@ -192,7 +193,6 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             end
         end,
     })
-
     Event:CreateDivider()
 
     Event:CreateSection("Christmas Event - Auto Player Gift")
