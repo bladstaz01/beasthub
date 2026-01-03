@@ -2026,7 +2026,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         RemoveTextAfterFocusLost = false,
         Flag = "delayToStayInEagles",
         Callback = function(Text)
-            M.delayToStayInEagle = tonumber(Text) or 15
+            M.delayToStayInEagle = tonumber(Text) or 30
         end,
     })
 
