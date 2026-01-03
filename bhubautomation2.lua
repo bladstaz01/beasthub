@@ -242,9 +242,11 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                             task.wait(animDelay)
                                             if cancelAnimationEnabled and M.isSafeToPickPlace and isPetInWorkspace(petId) then
                                                 game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("UnequipPet", petId)
-                                                task.wait(0.05)
+                                                -- task.wait(0.05)
+                                                task.wait(0.001)
                                                 equipPetByUuid(petId)
-                                                task.wait(0.05)
+                                                -- task.wait(0.05)
+                                                task.wait(0.001)
                                                 game:GetService("ReplicatedStorage").GameEvents.PetsService:FireServer("EquipPet", petId, location)
                                             else
                                                 -- print("not in workspace: "..petId)
@@ -2090,9 +2092,9 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
     Automation:CreateButton({
         Name = "Clear list",
         Callback = function()
-            dropdown_selectPetsForCore:Set({})
-            dropdown_selectPetsForOffSupport:Set({})
-            dropdown_selectPetsForEggReducer:Set({})
+            dropdown_selectPetsForCore:Set({"None"})
+            dropdown_selectPetsForOffSupport:Set({"None"})
+            dropdown_selectPetsForEggReducer:Set({"None"})
             parag_petsCore:Set({
                 Title = "Mimics:",
                 Content = "None"
