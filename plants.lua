@@ -212,11 +212,34 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 end
 
                 -- Gather current selections
-                local fruits = dropdown_selectedFruitForAutoCollect.CurrentOption or {}
-                local variants = dropdown_selectedFruitVariantForAutoCollect.CurrentOption or {}
-                local mutations = dropdown_selectedFruitMutationForAutoCollect.CurrentOption or {}
-                local kgMode = dropdown_selectedFruitKGmodeForAutoCollect.CurrentOption or {"Below"}
-                local kgValue = tonumber(dropdown_selectedFruitKGForAutoCollect.CurrentValue or 0)
+                -- local fruits = dropdown_selectedFruitForAutoCollect.CurrentOption or {}
+                -- local variants = dropdown_selectedFruitVariantForAutoCollect.CurrentOption or {}
+                -- local mutations = dropdown_selectedFruitMutationForAutoCollect.CurrentOption or {}
+                -- local kgMode = dropdown_selectedFruitKGmodeForAutoCollect.CurrentOption or {"Below"}
+                -- local kgValue = tonumber(dropdown_selectedFruitKGForAutoCollect.CurrentValue or 0)
+
+                --with retry logic
+                local fruits
+                local variants
+                local mutations
+                local kgMode
+                local kgValue
+                local waited = 0
+                while waited < 5 do
+                    fruits = dropdown_selectedFruitForAutoCollect and dropdown_selectedFruitForAutoCollect.CurrentOption
+                    kgValue = dropdown_selectedFruitKGForAutoCollect and tonumber(dropdown_selectedFruitKGForAutoCollect.CurrentValue)
+                    if typeof(fruits) == "table" and typeof(kgValue) == "number" then
+                        break
+                    end
+                    task.wait(0.5)
+                    waited += 0.5
+                end
+                fruits = typeof(fruits) == "table" and fruits or {}
+                variants = dropdown_selectedFruitVariantForAutoCollect and dropdown_selectedFruitVariantForAutoCollect.CurrentOption or {}
+                mutations = dropdown_selectedFruitMutationForAutoCollect and dropdown_selectedFruitMutationForAutoCollect.CurrentOption or {}
+                kgMode = dropdown_selectedFruitKGmodeForAutoCollect and dropdown_selectedFruitKGmodeForAutoCollect.CurrentOption or {"Below"}
+                kgValue = typeof(kgValue) == "number" and kgValue or 0
+
 
                 -- Input validation
                 if #fruits == 0 then
