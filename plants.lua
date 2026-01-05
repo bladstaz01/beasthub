@@ -3,6 +3,15 @@ local M = {}
 function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook)
     local Plants = Window:CreateTab("Plants", "leaf")
 
+    local maxFruitInBag = false
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Notification = ReplicatedStorage.GameEvents.Notification
+    Notification.OnClientEvent:Connect(function(message)
+        if typeof(message) == "string" and message:lower():find("max backpack space! go sell!") then
+            maxFruitInBag = true
+        end
+    end)
+
     local function getAllSeedsTable()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local ItemModule = require(ReplicatedStorage:WaitForChild("Item_Module"))
@@ -197,6 +206,18 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
         -- The variable (Text) is a string for the value in the text box
         end,
     })
+    local dropdown_delayToCollectFruits = Plants:CreateInput({
+        Name = "Delay to Collect",
+        CurrentValue = "0",
+        PlaceholderText = "number",
+        RemoveTextAfterFocusLost = false,
+        Flag = "delayToCollectFruits",
+        Callback = function(Text)
+        -- The function that takes place when the input is changed
+        -- The variable (Text) is a string for the value in the text box
+        end,
+    })
+
     local autoCollectFruitEnabled = false
     local autoCollectFruitThread = nil
     Plants:CreateToggle({
@@ -207,6 +228,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             autoCollectFruitEnabled = Value
 
             if autoCollectFruitEnabled then
+                maxFruitInBag = false
                 if autoCollectFruitThread then
                     return
                 end
@@ -224,10 +246,12 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 local mutations
                 local kgMode
                 local kgValue
+                local delayToCollect
                 local waited = 0
                 while waited < 5 do
                     fruits = dropdown_selectedFruitForAutoCollect and dropdown_selectedFruitForAutoCollect.CurrentOption
                     kgValue = dropdown_selectedFruitKGForAutoCollect and tonumber(dropdown_selectedFruitKGForAutoCollect.CurrentValue)
+                    delayToCollect = dropdown_delayToCollectFruits and tonumber(dropdown_delayToCollectFruits.CurrentValue)
                     if typeof(fruits) == "table" and typeof(kgValue) == "number" then
                         break
                     end
@@ -239,6 +263,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                 mutations = dropdown_selectedFruitMutationForAutoCollect and dropdown_selectedFruitMutationForAutoCollect.CurrentOption or {}
                 kgMode = dropdown_selectedFruitKGmodeForAutoCollect and dropdown_selectedFruitKGmodeForAutoCollect.CurrentOption or {"Below"}
                 kgValue = typeof(kgValue) == "number" and kgValue or 0
+                delayToCollect = typeof(delayToCollect) == "number" and delayToCollect or 0 
 
 
                 -- Input validation
@@ -339,6 +364,10 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                             local isKgAllowed = kgAllowed(fruitInstance, kgMode, kgValue)
                                             local fruitMatch = (#fruits == 0) or (table.find(fruits, curFruitName) ~= nil)
                                             if fruitMatch and variantAllowed and mutationAllowed and isKgAllowed then
+                                                if maxFruitInBag then
+                                                    task.wait(60)
+                                                    maxFruitInBag = false
+                                                end
                                                 -- print("multi, match found")
                                                 -- print(curFruitName)
                                                 if fruitInstance:IsA("Model") then
@@ -349,7 +378,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                                     }
                                                     game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 5):WaitForChild("Crops", 5):WaitForChild("Collect", 5):FireServer(unpack(args))
                                                 end
-                                                task.wait()
+                                                task.wait(delayToCollect)
                                             end
                                         end
                                     else
@@ -360,6 +389,10 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                         local isKgAllowed = kgAllowed(plant, kgMode, kgValue)
                                         local fruitMatch = (#fruits == 0) or (table.find(fruits, curFruitName) ~= nil)
                                         if fruitMatch and variantAllowed and mutationAllowed and isKgAllowed then
+                                            if maxFruitInBag then
+                                                task.wait(60)
+                                                maxFruitInBag = false
+                                            end
                                             -- print("single, match found")
                                             -- print(curFruitName)
                                             if plant:IsA("Model") then
@@ -369,7 +402,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                                                     };
                                                 }
                                                 game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 5):WaitForChild("Crops", 5):WaitForChild("Collect", 5):FireServer(unpack(args))
-                                                task.wait()
+                                                task.wait(delayToCollect)
                                             end
                                         end
                                     end
