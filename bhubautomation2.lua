@@ -837,6 +837,7 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
                         local toyList
                         local waited = 0
                         while waited < 5 do
+                            petList = dropdown_selectPetsForPetBoost and dropdown_selectPetsForPetBoost.CurrentOption
                             toyList = dropdown_selectedToys and dropdown_selectedToys.CurrentOption
                             if typeof(toyList) == "table" then
                                 break
