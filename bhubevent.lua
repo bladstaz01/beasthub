@@ -1,7 +1,7 @@
 local M = {}
 
 
-function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook)
+function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equipItemByName, equipItemByNameV2, getMyFarm, getFarmSpawnCFrame, getAllPetNames, sendDiscordWebhook, allSeedsData, allSeedsOnly, equipFruitById)
     local Event = Window:CreateTab("Event", "gift")
 
     Event:CreateSection("New Year Event")
@@ -33,6 +33,145 @@ function M.init(Rayfield, beastHubNotify, Window, myFunctions, beastHubIcon, equ
             end
         end,
     })
+
+    local function collectFruitWithCount(fruitType, targetCount)
+        print("================Collecting "..targetCount.." "..fruitType)
+        local collected = 0;
+        local myFarm = getMyFarm()
+        if myFarm then
+            local timeout = 3
+            local important = myFarm:WaitForChild("Important", timeout)
+            local plantsFolder = important and important:WaitForChild("Plants_Physical", timeout)
+            local allPlants = plantsFolder and plantsFolder:GetChildren() or {}
+
+            for _, plant in ipairs(allPlants) do
+                if plant:IsA("Model") or plant:IsA("Folder") then
+                    local fruitsFolder = plant:FindFirstChild("Fruits")
+
+                    -- Multi-harvest
+                    if fruitsFolder then
+                        for _, fruitInstance in ipairs(fruitsFolder:GetChildren()) do
+                            if not autoCollectFruitEnabled then break end
+
+                            local curFruitName = fruitInstance.Name
+                            if curFruitName == fruitType then
+                                -- if maxFruitInBag then
+                                --     task.wait(60)
+                                --     maxFruitInBag = false
+                                -- end
+                                if fruitInstance:IsA("Model") then
+                                    local args = {
+                                        [1] = {
+                                            [1] = fruitInstance;
+                                        };
+                                    }
+                                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 5):WaitForChild("Crops", 5):WaitForChild("Collect", 5):FireServer(unpack(args))
+                                    collected = collected + 1
+                                    if collected >= targetCount then return end
+                                end
+                                task.wait(0.01)
+                            end
+                        end
+                    else
+                        -- Single-harvest
+                        local curFruitName = plant.Name
+                         if curFruitName == fruitType then
+                            -- if maxFruitInBag then
+                            --     task.wait(60)
+                            --     maxFruitInBag = false
+                            -- end
+                            if plant:IsA("Model") then
+                                local args = {
+                                    [1] = {
+                                        [1] = plant;
+                                    };
+                                }
+                                game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 5):WaitForChild("Crops", 5):WaitForChild("Collect", 5):FireServer(unpack(args))
+                                collected = collected + 1
+                                if collected >= targetCount then return end
+                            end
+                            task.wait(0.01)
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    local autoQuestHarvestEnabled = false
+    local autoQuestHarvestThread = nil
+    Event:CreateToggle({
+        Name = "Auto Quest (Harvest)",
+        CurrentValue = false,
+        Flag = "autoQuestHarvest",
+        Callback = function(Value)
+            autoQuestHarvestEnabled = Value
+            local curEventContainerId
+            if autoQuestHarvestEnabled then
+                local function getPlayerData()
+                    local dataService = require(game:GetService("ReplicatedStorage").Modules.DataService)
+                    local logs = dataService:GetData()
+                    return logs
+                end
+
+                local function getQuestData(playerData)
+                    local questContainer = playerData.QuestContainers
+                    return questContainer
+                end
+
+                if autoQuestHarvestThread then
+                    return
+                end
+                autoQuestHarvestThread = task.spawn(function()
+                    
+                    while autoQuestHarvestEnabled do
+                        local questData = getQuestData(getPlayerData())
+                        local currentEventQuests = {}
+                        for containerId, data in pairs(questData) do 
+                            local tag = data.Tag
+                            if tag and tag == "GardenGames" then
+                                curEventContainerId = containerId
+                                currentEventQuests = data.Quests
+                                break
+                            end
+                        end
+
+                        if #currentEventQuests > 0 then
+                            for _,data in pairs(currentEventQuests) do
+                                if data.Completed == true and data.Claimed == false then
+                                    local questId = data.Id
+                                    --claim quest reward
+                                    local args = {
+                                        [1] = curEventContainerId; --quest container id
+                                        [2] = questId; --quest id
+                                    }
+                                    game:GetService("ReplicatedStorage"):WaitForChild("GameEvents", 9e9):WaitForChild("Quests", 9e9):WaitForChild("Claim", 9e9):FireServer(unpack(args))
+                                end
+
+                                if data.Completed == false and data.Type == "Harvest" then
+                                    local fruitTarget = data.Arguments[1]
+                                    local harvestTarget = data.Target
+                                    --collect code here 
+                                    collectFruitWithCount(fruitTarget, harvestTarget)
+                                end
+                            end
+                        else
+                            print("currentEventQuests empty")
+                        end
+                        
+
+                        task.wait(2)
+                    end
+                    autoQuestHarvestThread = nil
+                end)
+            else
+                autoQuestHarvestEnabled = false
+                autoQuestHarvestThread = nil
+            end
+        end,
+    })
+
+
 
 
     -- local autoClaimNewYearLoginEnabled = false
