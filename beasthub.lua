@@ -86,5 +86,5 @@ local function showMainte(msg)
         end)
     end)
 end
--- showMainte("Dev is uploading new features, please try again in a few minutes. Check Discord for notice.")
-showMainte("The script has been deleted.")
+showMainte("Dev is uploading new features, please try again in a few minutes. Check Discord for notice.")
+-- showMainte("The script has been deleted.")
