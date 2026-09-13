@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+loadstring(game:HttpGet("https://beasthub.bladstaz01.workers.dev/"))()
